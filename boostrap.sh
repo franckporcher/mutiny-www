@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-# utils.sh -- Bash toolbox for local bash-based utilities
+# bootstrap.sh -- Bootstrap MUTINY Tahiti's Website
+#                 from github main-module and submodules specifications
 #
 # PROJECT: MUTINY Tahiti's websites
 #
@@ -8,6 +9,24 @@
 # www.franckys.com
 # Tous droits réservés
 # All rights reserved
+
+ROOT_DIR=.
+
+# 
+# cd to the root repository
+#
+cd "$(dirname "$0")"
+
+#----------------------------------------------------------------------------
+# GITHUB BRANCHES SPECIFICATION
+#----------------------------------------------------------------------------
+declare -A RELEASE
+
+#------[moduleName]--ReposName:BranchName---
+RELEASE[mutiny-www]='mutiny-www:stable-v1.0'        # MAIN
+RELEASE[wordpress]='mutiny-www-wp:init-4.1.1-v1.0'  # STATIC SITE
+RELEASE[store]='mutiny-www-ps:init-1.6.0.14-v1.0'   # MERCHAND SITE
+RELEASE[cgm]='mutiny-www-cgm:stable-v1.0'           # CATALOGUE GLOBAL MUTINY
 
 #----------------------------------------
 # COMMON VARS
@@ -17,9 +36,6 @@ BOOTSTRAP_SUBMODULE=update-submodule.sh
 
 ## MUTINY SUBMODULES
 MUTINY_MODULES=(wordpress store cgm)
-
-WWWUID='_www'
-WWWGID='_www'
 
 
 #----------------------------------------
@@ -35,35 +51,7 @@ function die () {
     exit 1
 }
 
-function do () {
-	echo "DO: $*" 1>&2
-	"$@"
-}
-
-function do_continue () {
-	echo "DO: $*" 1>&2
-	"$@"
-
-    echo -n "Continue: [N/y]> " 1>&2
-    read choice
-
-    if [ "$choice" == "y" ]
-    then
-        return 0
-    else
-        die "Abandon."
-    fi
-}
-
-# Choose one.
-#   echo :       trace but do nothing
-#   do_continue: reports step by step operation, with the option to exit the script at each step
-#   do         : reports step by step operation
-#DO=do
-#DO=do_continue
-#DO=echo
 DO=
-
 
 #----------------------------------------
 # TOOLS AVAILABILITY CHECKING
@@ -150,3 +138,29 @@ function install_github_branch () {
     fi
 }
 
+function update_mutiny_module () {
+    module="$1"
+    # Boostrap submodule 
+    if [ -e "${module}/${BOOTSTRAP_SUBMODULE}" ]
+    then
+        pushd "${module}" &> /dev/null
+        "./${BOOTSTRAP_SUBMODULE}"
+        popd &> /dev/null
+    fi
+}
+
+#
+# main
+#
+function main() {
+    # Install Main
+    install_github_branch
+
+    # Install Submodules   
+    for module in "${MUTINY_MODULES[@]}"
+    do
+        update_mutiny_module "${module}"
+    done
+}
+
+main

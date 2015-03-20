@@ -27,6 +27,8 @@ function __test () {
 
 function install_submodule () {
     install_github_branch
+    chown "${WWWUID}${WWWGID}" .
+    chown -R "${WWWUID}${WWWGID}" *
 }
 
 #
