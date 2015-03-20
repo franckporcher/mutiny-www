@@ -121,7 +121,6 @@ function install_github_branch () {
     # 1. Get the repository name and the branch name to fetch
     dirname="$(basename "$(pwd)" )"
     repos_def="${RELEASE["$dirname"]}" #git-repos-name:branch-name
- echo "DIRNAME:($dirname) REPOSDEF:$repos_def"
     [ -z "$repos_def" ] && die "No known github repository for '$dirname'"
 
     OIFS="$IFS"
