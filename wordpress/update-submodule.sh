@@ -29,7 +29,7 @@ function install_submodule () {
     install_github_branch ${ROOT_DIR}
     cd ${ROOT_DIR}
     chown "${WWWUID}:${WWWGID}" .
-    chown -R "${WWWUID}:${WWWGID}" index.php licese.txt readme.html wp-* xmlrpc.php
+    chown -R "${WWWUID}:${WWWGID}" index.php license.txt readme.html wp-* xmlrpc.php
 }
 
 #
