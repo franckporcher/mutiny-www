@@ -1,11 +1,13 @@
 #!/bin/bash
 #
+# db.sh -- Scripted management of MUTONY Tahiti's MySQL databases
+#
+# PROJECT: MUTINY Tahiti's websites
+#
 # Copyright (C) 1995-2015 - Franck Porcher, Ph.D 
 # www.franckys.com
 # Tous droits réservés
 # All rights reserved
-#
-VERSION="0.1 -- Jeu 19 mar 2015 19:21:18 PDT"
 
 #----------------------------------------
 # HELP
@@ -46,6 +48,7 @@ function log () {
 }
 
 function die () {
+    echo "ERROR: $*. Exiting!" 1>&2
     log "ERROR: $*. Exiting!"
     exit 1
 }
