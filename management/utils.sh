@@ -29,6 +29,11 @@ function do () {
 	"$@"
 }
 
+function do_log () {
+    log "PWD:[$(pwd)] CMD:[$*]"
+    "$@"
+}
+
 function do_continue () {
     local choice
 
@@ -52,8 +57,9 @@ function do_continue () {
 #   do         : reports step by step operation
 #DO=echo
 #DO=do_continue
+#DO=do_log
 #DO=do
-DO=
+DO=do_log
 
 #----------------------------------------
 # BEGIN
@@ -141,9 +147,9 @@ function _RUN_SCRIPT () {
     then
         if [ -x "${script}" ] 
         then
-            "${script}" "$@"
+            $DO "${script}" "$@"
         else 
-            $BASH "${script}" "$@"
+            $DO $BASH "${script}" "$@"
         fi
     fi
 }
@@ -211,18 +217,18 @@ function bootstrap_module () {
     install_dir="$4"
 
     # 1. Move to install_dir 
-    [ ! -d "${install_dir}" ] &&  mkdir -p "${install_dir}"
-    cd "${install_dir}" || die "Cannot cd:[${install_dir}] for installing module:[$module_name]"
+    [ ! -d "${install_dir}" ] && $DO  mkdir -p "${install_dir}"
+    $DO cd "${install_dir}" || die "Cannot cd:[${install_dir}] for installing module:[$module_name]"
 
     # 2. Retrieve remote distribution
     # $GIT_URL="ssh://git@github.com/franckporcher"
-    $GIT clone --branch "${git_branch_name}" "$( git_url "${git_repos_name}" )" .
+    $DO $GIT clone --branch "${git_branch_name}" "$( git_url "${git_repos_name}" )" .
 
     # 3. REC 
-    rec_bootstrap_module "${git_repos_name}"
+    $DO rec_bootstrap_module "${git_repos_name}"
 
     # 4. Post bootstrap 
-    _RUN_SCRIPT "${BOOTSTRAP_MODULE_POST}"
+    $DO _RUN_SCRIPT "${BOOTSTRAP_MODULE_POST}"
 }
 
 
@@ -246,7 +252,7 @@ function rec_bootstrap_module () {
         if [ $# -eq 3 ]
         then
             pushd . &> /dev/null
-            bootstrap_module "${submodule}" "$@"
+            $DO bootstrap_module "${submodule}" "$@"
             popd &> /dev/null
         fi
     done

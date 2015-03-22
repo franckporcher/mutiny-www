@@ -24,6 +24,14 @@ function die () {
     exit 1
 }
 
+function do_log () {
+    log "PWD:[$(pwd)] CMD:[$*]"
+    "$@"
+}
+
+DO=do_log
+   
+
 #----------------------------------------
 # BEGIN
 #----------------------------------------
@@ -79,11 +87,11 @@ function bootstrap_module () {
     install_dir="$4"
 
     # 1. Move to install_dir 
-    [ ! -d "${install_dir}" ] &&  mkdir -p "${install_dir}"
-    cd "${install_dir}" || die "Cannot cd:[${install_dir}] for installing module:[$module_name]"
+    [ ! -d "${install_dir}" ] &&  $DO mkdir -p "${install_dir}"
+    $DO cd "${install_dir}" || die "Cannot cd:[${install_dir}] for installing module:[$module_name]"
 
     # 2. Retrieve remote distribution
-    $GIT clone --branch "${git_branch_name}" "ssh://git@github.com/franckporcher/${git_repos_name}.git" .
+    $DO $GIT clone --branch "${git_branch_name}" "ssh://git@github.com/franckporcher/${git_repos_name}.git" .
 }
 
 #
@@ -91,7 +99,7 @@ function bootstrap_module () {
 #
 function main() {
     # PHASE 1 : Install le chapeau
-    bootstrap_module mutiny mutiny-www stable-v1.0 ~/mutiny-www-dev
+    $DO bootstrap_module mutiny mutiny-www stable-v1.0 ~/mutiny-www-dev
     
     # PHASE 2 : Bootstrap the remaining installation
     #           using the installed elements
@@ -99,9 +107,9 @@ function main() {
     then
         if [ -x ./boostrap.post.sh ] 
         then
-            ./boostrap.post.sh
+            $DO ./boostrap.post.sh
         else 
-            $BASH .boostrap.post.sh
+            $DO $BASH .boostrap.post.sh
         fi
     fi
 }
