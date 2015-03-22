@@ -248,11 +248,12 @@ function rec_bootstrap_module () {
     # 1. Get the repository name and the branch name to fetch
     for submodule in ${MODULES["${module_name}"]}
     do
-        set ${INITIAL_RELEASE["${module_name}"]}
+        set ${INITIAL_RELEASE["${submodule}"]}
         if [ $# -eq 3 ]
         then
+            eval "install_dir=$3"   # for possible ~ expansion
             pushd . &> /dev/null
-            $DO bootstrap_module "${submodule}" "$@"
+            $DO bootstrap_module "${submodule}" "$1" "$2" "${install_dir}"
             popd &> /dev/null
         fi
     done
