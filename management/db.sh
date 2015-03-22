@@ -10,80 +10,56 @@
 # All rights reserved
 
 #----------------------------------------
+# BEGIN
+#----------------------------------------
+cd "$(dirname "$0")"
+SCRIPTNAME="$(basename "$0")"
+SCRIPTFQN="$(pwd)/$SCRIPTNAME"
+
+UTILS='./utils.sh'
+
+if [ -e "${UTILS}" ]
+then
+    source "${UTILS}"
+else
+    msg="[ERROR:$SCRIPTFQN] Cannot locate mandatory dependancy: ${UTILS}. Cancelling!"
+    echo "$msg" 1>&2
+    logger -s -t "$SCRIPTNAME" "$*"
+    exit 1
+fi
+
+
+#----------------------------------------
+# MYSQL DB CREDENTIALS (imported by utils.sh)
+#----------------------------------------
+
+#----------------------------------------
 # HELP
 #----------------------------------------
 function help () {
 	cat <<-EOT
-        Usage: $(basename "$0") [OPTIONS] [CMD] [ARGS]
+        Usage: $SCRIPTNAME [OPTIONS] [CMD] [ARGS]
 
         OPTIONS:
             -h          Display this help
 
         CMD:
-            -d ps       Dump Mutiny's Prestashop database
-            -d wp       Dump Mutiny's WordPress database
-            -r ps       Restore Mutiny's Prestashop database
-            -r wp       Restore Mutiny's WordPress database
-            -s ps       Reset Mutiny's Prestashop database
-            -s wp       Reset Mutiny's WordPress database
+            -d DB FILE  Dump Mutiny's database DB to file FILE
+            -r DB FILE  Restore Mutiny's database DB with file FILE
+            -s DB       Reset Mutiny's database DB
+            -i          Init/Reset everything
 
         ARGS:
-            ps         Mutiny's Prestashop database
-            wp         Mutiny's WordPress database
-
-            sql.file   input or output sql filename.
-                       Defaults to using 'psmutiny.sql' for ps database
-                       and 'wpmutiny.sql' for wp database
+            DB::
+                ps      Mutiny's Prestashop database
+                wp      Mutiny's WordPress database
+            FILE::      Any sql file
+                        Defaults to using 'psmutiny.sql' for ps database
+                        and 'wpmutiny.sql' for wp database
 
 		Copyright (C) 2015 - Franck Porcher, Ph.D. - All rights reserved
 	EOT
 }
-
-
-#----------------------------------------
-# DEBUG
-#----------------------------------------
-function log () {
-    logger -s -t "$(basename $0)" "$*"
-}
-
-function die () {
-    echo "ERROR: $*. Exiting!" 1>&2
-    log "ERROR: $*. Exiting!"
-    exit 1
-}
-
-function do () {
-	echo "DO: $*" 1>&2
-	"$@"
-}
-
-function do_continue () {
-    local choice
-
-	echo "DO: $*" 1>&2
-	"$@"
-
-    echo -n "Continue: [N/y]> " 1>&2
-    read choice
-
-    if [ "$choice" == "y" ]
-    then
-        return 0
-    else
-        die "Abandon."
-    fi
-}
-
-# Choose one.
-#   echo :       trace but do nothing
-#   do_continue: reports step by step operation, with the option to exit the script at each step
-#   do         : reports step by step operation
-#DO=do
-#DO=do_continue
-#DO=echo
-DO=
-
 
 #----------------------------------------
 # OPTIONS
@@ -99,7 +75,7 @@ DO=
 #   > bad option found:           '?' into OPTION and option into OPTARG
 #   > option argument missing:    ':' into OPTION and option into OPTARG 
 # 
-OPTSTRING=":hd:r:s:"
+OPTSTRING=":hd:r:s:i"
 OP=
 DB=
 
@@ -108,14 +84,17 @@ do
     case "${OPTION}" in
         h) help && exit 0
            ;;
-        d) OP=dump
+        d) OP=_mysql_dump_db
            DB="${OPTARG}"
            ;;
-        r) OP=restore
+        r) OP=_mysql_restore_db
            DB="${OPTARG}"
            ;;
-        s) OP=reset
+        s) OP=_mysql_reset_db
            DB="${OPTARG}"
+           ;;
+        i) OP=_mysql_init_all
+           DB=ps
            ;;
 
       '?') die "Invalid option: ${OPTARG}"
@@ -127,61 +106,57 @@ do
 done
 
 shift $((OPTIND - 1))
-echo "$@"
 
 
 #----------------------------------------
 # HELPERS
 #----------------------------------------
-SRC_HOST=localhost
-DEST_HOST=sql.mutinytahiti.com
-
-SRC_DB_ROOT=root
-DEST_DB_ROOT=root
-SRC_DB_ADMIN=mutiny_db_admin
-DEST_DB_ADMIN=mutiny_db_admin
-
-DB_PS=psmutiny
-DB_WP=wpmutiny
-
-
-function dump_ps () {
-    file="$1"
-    [ -z "${file}" ] && file="${DB_PS}.sql"
-    ${DO} mysqldump --host="${SRC_HOST}" "${DB_PS}" -u "${SRC_DB_ADMIN}" -p > "${file}"
+# _mysql_dump_db DB SQLFILE
+function _mysql_dump_db () {
+    DBNAME="$1"
+    SQLFILE="$2"
+    [ -z "${SQLFILE}" ] && SQLFILE="${DBNAME}.sql"
+    ${DO} mysqldump "--host=${SQL_DBSERVER}" -u "${SQL_DBADMIN}" "--password=${SQL_DBADMIN_PWD}" "${DBNAME}" > "${SQLFILE}"
 }
 
-function dump_wp () {
-    file="$1"
-    [ -z "${file}" ] && file="${DB_WP}.sql"
-    ${DO} mysqldump --host="${SRC_HOST}" "${DB_WP}" -u "${SRC_DB_ADMIN}" -p > "${file}"
+function _mysql_restore_db () {
+    DBNAME="$1"
+    SQLFILE="$2"
+    [ -z "${SQLFILE}" ] && SQLFILE="${DBNAME}.sql"
+    if [ -e "${SQLFILE}" ]
+    then 
+        ${DO} mysql "--host=${SQL_DBSERVER}" -u "${SQL_DBADMIN}" "--password=${SQL_DBADMIN_PWD}" "${DBNAME}" < "${SQLFILE}"
+    else
+        die "Cannot locate sql-file: ${SQLFILE}"
+    fi
 }
 
-function restore_ps () {
-    file="$1"
-    [ -z "${file}" ] && file="${DB_PS}.sql"
-    ${DO} mysql --host="${DEST_HOST}" "${DB_PS}" -u "${DEST_DB_ADMIN}" -p < "${file}"
-}
-
-function restore_wp () {
-    file="$1"
-    [ -z "${file}" ] && file="${DB_PS}.sql"
-    ${DO} mysql --host="${DEST_HOST}" "${DB_WP}" -u "${DEST_DB_ADMIN}" -p < "${file}"
-}
-
-function reset_ps () {
-    ${DO} mysql --host="${DEST_HOST}" "${DB_PS}" -u "${DEST_DB_ROOT}" -p <<-EOT
-        DROP DATABASE ${DB_PS};
-        CREATE DATABASE ${DB_PS} CHARSET utf8 COLLATE 'utf8_general_ci';
-        GRANT ALL PRIVILEGES ON ${DB_PS}.* TO '${SRC_DB_ADMIN}';
+function _mysql_reset_db () {
+    DBNAME="$1"
+    ${DO} mysql --force "--host=${SQL_DBSERVER}" -u "${SQL_ROOT}" -p <<-EOT
+        DROP DATABASE ${DBNAME};
+        CREATE DATABASE ${DBNAME} CHARSET utf8 COLLATE 'utf8_general_ci';
+        GRANT ALL PRIVILEGES ON ${DBNAME}.* TO '${SQL_DBADMIN}';
 EOT
 }
 
-function reset_wp () {
-    ${DO} mysql --host="${DEST_HOST}" "${DB_WP}" -u "${DEST_DB_ROOT}" -p <<-EOT
-        DROP DATABASE ${DB_WP};
-        CREATE DATABASE ${DB_WP} CHARSET utf8 COLLATE 'utf8_general_ci';
-        GRANT ALL PRIVILEGES ON ${DB_WP}.* TO '${SRC_DB_ADMIN}';
+function _mysql_init_all () {
+    ${DO} mysql --force "--host=${SQL_DBSERVER}" -u "${SQL_ROOT}" -p <<-EOT
+        GRANT ALL PRIVILEGES ON *.* TO '${SQL_ROOT}' WITH GRANT OPTION;
+
+        DROP USER '${SQL_DBADMIN}';
+        REVOKE ALL PRIVILEGES ON ${SQL_PSDB}.* FROM '${SQL_DBADMIN}';
+        REVOKE ALL PRIVILEGES ON ${SQL_WPDB}.* FROM '${SQL_DBADMIN}';
+        REVOKE ALL PRIVILEGES ON *.* FROM '${SQL_DBADMIN}';
+        CREATE USER '${SQL_DBADMIN}' IDENTIFIED BY '${SQL_DBADMIN_PWD}';
+
+        DROP DATABASE ${SQL_PSDB};
+        CREATE DATABASE ${SQL_PSDB} CHARSET utf8 COLLATE 'utf8_general_ci';
+        GRANT ALL PRIVILEGES ON ${SQL_PSDB}.* TO '${SQL_DBADMIN}';
+
+        DROP DATABASE ${SQL_WPDB};
+        CREATE DATABASE ${SQL_WPDB} CHARSET utf8 COLLATE 'utf8_general_ci';
+        GRANT ALL PRIVILEGES ON ${SQL_WPDB}.* TO '${SQL_DBADMIN}';
 EOT
 }
 
@@ -192,17 +167,19 @@ EOT
 function main () {
     [ -z "${OP}" ] && help && exit 0;
 
+    SQLFILE="$1"
+
     case "$DB" in
-        ps) :
+        ps) DB="${SQL_PSDB}"
             ;;
-        wp) :
+        wp) DB="${SQL_WPDB}"
             ;;
         *)
             die "Invalid Database reference: $DB (Please refer to --help, or -h)"
             ;;
     esac
             
-    "${OP}_${DB}" "${1}"
+    "${OP}" "${DB}" "${SQLFILE}"
 }
 
 main "$@"

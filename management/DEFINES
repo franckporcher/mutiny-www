@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# DEFINES - global definitions
+#
+# PROJECT: MUTINY Tahiti's websites
+#
+# Copyright (C) 1995-2015 - Franck Porcher, Ph.D 
+# www.franckys.com
+# Tous droits réservés
+# All rights reserved
+
+
+#----------------------------------------
+# APPLICATION MODULES
+#----------------------------------------
+# Modules Arborescence
+declare -A MODULES
+MODULES[root]='mutiny'
+MODULES[mutiny]='wordpress store cgm'
+
+
+#----------------------------------------
+# GIT STUFF 
+#----------------------------------------
+GIT_URL="ssh://git@github.com/franckporcher"
+
+# Git Modules
+declare -A INITIAL_RELEASE
+declare -A CURRENT_RELEASE
+
+# moduleName > ReposName:BranchName:InstallDir
+INITIAL_RELEASE[mutiny]='mutiny-www stable-v1.0 ~/mutiny-www-dev'
+INITIAL_RELEASE[wordpress]='mutiny-www-wp init-4.1.1-v1.0 .'
+INITIAL_RELEASE[store]='mutiny-www-ps init-1.6.0.14-v1.0 store'
+INITIAL_RELEASE[cgm]='mutiny-www-cgm stable-v1.0 cgm'
+
+CURRENT_RELEASE[mutiny]='mutiny-www stable-v1.0 ~/mutiny-www-dev'
+CURRENT_RELEASE[wordpress]='mutiny-www-wp init-4.1.1-v1.0 .'
+CURRENT_RELEASE[store]='mutiny-www-ps init-1.6.0.14-v1.0 store'
+CURRENT_RELEASE[cgm]='mutiny-www-cgm stable-v1.0 cgm'
+
+
+#----------------------------------------
+# MYSQL DB CREDENTIALS
+#----------------------------------------
+SQL_DBSERVER=devsql.mutinytahiti.com
+
+SQL_ROOT=root
+SQL_DBADMIN='mutiny_db_admin'
+SQL_DBADMIN_PWD='AmantesIslaUnidos'
+
+SQL_PSDB=psmutiny
+SQL_WPDB=wpmutiny
+
+#----------------------------------------
+# WEB SERVER CREDENTIALS
+#----------------------------------------
+WWWUID='_www'
+WWWGID='_www'
+
+#----------------------------------------
+# INSTALLATION HELPERS
+#----------------------------------------
+BOOTSTRAP_MODULE='./bootstrap.sh'
+BOOTSTRAP_MODULE_POST='./bootstrap.post.sh'
+
+UPDATE_MODULE='./install_module.sh'
+UPDATE_MODULE_PRE='./install_module.pre.sh'
+UPDATE_MODULE_POST='./install_module.post.sh'
+

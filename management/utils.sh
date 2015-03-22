@@ -1,37 +1,26 @@
-#!/bin/bash
-#
 # utils.sh -- Bash toolbox for local bash-based utilities
 #
 # PROJECT: MUTINY Tahiti's websites
 #
+# File to be SOURCED, not ran directly
+#
+# MUTINY_ROOT_INSTALL must be defined or taken as . as default
+#
 # Copyright (C) 1995-2015 - Franck Porcher, Ph.D 
 # www.franckys.com
 # Tous droits réservés
-# All rights reserved
-
-#----------------------------------------
-# COMMON VARS
-#----------------------------------------
-BOOTSTRAP_MAIN=update-modules.sh
-BOOTSTRAP_SUBMODULE=update-submodule.sh
-
-## MUTINY SUBMODULES
-MUTINY_MODULES=(wordpress store cgm)
-
-WWWUID='_www'
-WWWGID='_www'
-
 
 #----------------------------------------
 # DEBUG
 #----------------------------------------
 function log () {
-    logger -s -t "$(basename $0)" "$*"
+    logger -s -t "$SCRIPTNAME" "$*"
 }
 
 function die () {
-    echo "ERROR: $*. Exiting!" 1>&2
-    log  "ERROR: $*. Exiting!"
+    msg="[ERROR:$SCRIPTFQN] $*. Aborting!"
+    echo "$msg" 1>&2
+    log "$msg"
     exit 1
 }
 
@@ -41,6 +30,8 @@ function do () {
 }
 
 function do_continue () {
+    local choice
+
 	echo "DO: $*" 1>&2
 	"$@"
 
@@ -59,14 +50,35 @@ function do_continue () {
 #   echo :       trace but do nothing
 #   do_continue: reports step by step operation, with the option to exit the script at each step
 #   do         : reports step by step operation
-#DO=do
-#DO=do_continue
 #DO=echo
+#DO=do_continue
+#DO=do
 DO=
 
+#----------------------------------------
+# BEGIN
+#----------------------------------------
+[ -z "${MUTINY_ROOT_INSTALL}" ] && MUTINY_ROOT_INSTALL="$(pwd)"
+export MUTINY_ROOT_INSTALL
+
+DEFINES="${MUTINY_ROOT_INSTALL}/management/DEFINES"
+
+if [ -e "${DEFINES}" ]
+then
+    source "${DEFINES}"
+else
+    die "[ERROR] Cannot locate mandatory dependancy:[${DEFINES}]"
+fi
 
 #----------------------------------------
 # TOOLS AVAILABILITY CHECKING
+#
+#   curl
+#   git
+#   mysql
+#   realpath
+#   unzip
+#   
 #----------------------------------------
 ##
 #
@@ -93,15 +105,24 @@ function __nocmd () {
 ##
 # TOOLS NEEDED
 #
-__bootstrap REALPATH realpath __realpath
-    # $resolved_path="$(__realpath $path)"
-    function __realpath () {
-        echo "$1"
-    }
-
 __bootstrap CURL curl __curl
     function __curl () {
         __nocmd curl "$*"
+    }
+
+__bootstrap GIT git __git
+    function __git () {
+        __nocmd git "$*"
+    }
+
+__bootstrap MYSQL mysql __mysql
+    function __mysql () {
+        __nocmd mysql "$*"
+    }
+
+__bootstrap REALPATH realpath __realpath
+    function __realpath () {
+        echo "$1"
     }
 
 __bootstrap UNZIP unzip __unzip
@@ -109,6 +130,23 @@ __bootstrap UNZIP unzip __unzip
         __nocmd unzip "$*"
     }
 
+#----------------------------------------
+# HELPERS
+#----------------------------------------
+function _RUN_SCRIPT () {
+    script="$1"
+    shift
+
+    if [ -e "${script}" ]
+    then
+        if [ -x "${script}" ] 
+        then
+            "${script}" "$@"
+        else 
+            $BASH "${script}" "$@"
+        fi
+    fi
+}
 
 #----------------------------------------
 # GITHUB STUFF
@@ -149,4 +187,69 @@ function install_github_branch () {
         rm "${zipfile}"
     fi
 }
+
+##
+# git_url=$(git_url repos_name)
+#
+# Clone into a given dir the reference repository
+# for a given module
+# 
+function git_url () {
+    echo "${GIT_URL}/${1}.git"
+}
+
+##
+# bootstrap_module module_name git_repos_name git_branch_name install_dir
+#
+# Clone into a given dir the reference repository
+# for a given module
+# 
+function bootstrap_module () {
+    module_name="$1"
+    git_repos_name="$2"
+    git_branch_name="$3"
+    install_dir="$4"
+
+    # 1. Move to install_dir 
+    [ ! -d "${install_dir}" ] &&  mkdir -p "${install_dir}"
+    cd "${install_dir}" || die "Cannot cd:[${install_dir}] for installing module:[$module_name]"
+
+    # 2. Retrieve remote distribution
+    # $GIT_URL="ssh://git@github.com/franckporcher"
+    $GIT clone --branch "${git_branch_name}" "$( git_url "${git_repos_name}" )" .
+
+    # 3. REC 
+    rec_bootstrap_module "${git_repos_name}"
+
+    # 4. Post bootstrap 
+    _RUN_SCRIPT "${BOOTSTRAP_MODULE_POST}"
+}
+
+
+##
+# rec_bootstrap_module module_name
+#
+# Clone into a given dir the reference repository
+# for a given module
+
+# rec_bootstrap_module module_name
+# 
+function rec_bootstrap_module () {
+    module_name="$1"
+
+    [ -z "${module_name}" ] && return
+
+    # 1. Get the repository name and the branch name to fetch
+    for submodule in ${MODULES["${module_name}"]}
+    do
+        set ${INITIAL_RELEASE["${module_name}"]}
+        if [ $# -eq 3 ]
+        then
+            pushd . &> /dev/null
+            bootstrap_module "${submodule}" "$@"
+            popd &> /dev/null
+        fi
+    done
+}
+    
 
