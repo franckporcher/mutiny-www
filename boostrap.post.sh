@@ -30,9 +30,9 @@ function main() {
     $DO rec_bootstrap_module "${top_module}"
 
     # INSTALL THE SQL STUFF
-    $DO ./management/db.sh -i
-    $DO ./management/db.sh -r ps psmutiny.init.sql
-    $DO ./management/db.sh -r wp wpmutiny.init.sql
+    #$DO ./management/db.sh -i
+    #$DO ./management/db.sh -r ps psmutiny.init.sql
+    #$DO ./management/db.sh -r wp wpmutiny.init.sql
 }
 
 main

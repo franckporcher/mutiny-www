@@ -100,7 +100,7 @@ function bootstrap_module () {
 function main() {
     # PHASE 1 : Install le chapeau
     $DO bootstrap_module mutiny mutiny-www stable-v1.0 ~/mutiny-www-dev
-    
+
     # PHASE 2 : Bootstrap the remaining installation
     #           using the installed elements
     if [ -e ./boostrap.post.sh ]
