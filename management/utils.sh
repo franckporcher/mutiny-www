@@ -79,6 +79,7 @@ fi
 #----------------------------------------
 # TOOLS AVAILABILITY CHECKING
 #
+#   awk
 #   curl
 #   git
 #   mysql
@@ -111,6 +112,12 @@ function __nocmd () {
 ##
 # TOOLS NEEDED
 #
+
+__bootstrap AWK awk __awk
+    function __awk () {
+        __nocmd awk "$*"
+    }
+
 __bootstrap CURL curl __curl
     function __curl () {
         __nocmd curl "$*"
@@ -155,27 +162,34 @@ function _RUN_SCRIPT () {
 }
 
 #----------------------------------------
+# FILE STUFF
+#----------------------------------------
+
+#owner=$( file_owner file )
+function file_owner () {
+    ls -ld "$1" | $AWK '{print $3}'
+}
+
+#----------------------------------------
 # GITHUB STUFF
 #----------------------------------------
 
 ##
 # Download a zip from a github repository and install it
 #
-# install_github_branch INSTALLDIR (. by default)
-function install_github_branch () {
-    install_dir="${1:-.}"
+# install_git_distribution module
+function install_git_distribution () {
+    module_name="$1"
 
-    # 1. Get the repository name and the branch name to fetch
-    dirname="$(basename "$(pwd)" )"
-    repos_def="${RELEASE["$dirname"]}" #git-repos-name:branch-name
-    [ -z "$repos_def" ] && die "No known github repository for '$dirname'"
+    [ -z "${module_name}" ] && die "Usage: install_git_distribution <module_name>"
 
-    OIFS="$IFS"
-    IFS=':'
-    set $repos_def
-    IFS="$OIFS"
+    set ${INITIAL_RELEASE["${module_name}"]}
+    [ $# -ne 3 ] && die "Invalid git module specification:[${INITIAL_RELEASE["${module_name}"]}]"
+
     repos_name="$1"
     branch_name="$2"
+    eval "install_dir=$3"   # for possible ~ expansion
+
     zipdirname="${repos_name}-${branch_name}"
     zipfile="${repos_name}-${branch_name}.zip"
 
@@ -183,10 +197,14 @@ function install_github_branch () {
     $CURL -s -f -C - --retry 9 --retry-delay 5 -o "${zipfile}"  "https://codeload.github.com/franckporcher/${repos_name}/zip/${branch_name}"
     if [ -s "${zipfile}" ]
     then
-        # The zip archive contains one directory named ${repos_name}-${branch_name}
-        # We should extract the content of this dir into the current dir,
+        # Create the recipient directory, unless it exists
+        [ ! -d "${install_dir}" ] && mkdir -p "${install_dir}"
+
+        # The zip archive comprises one directory named ${repos_name}-${branch_name}
+        # We must extract the content of this dir into the install_dir
         # instead of creating that dir into the current dir
-        # we do the trick by creating a symbolink link
+        # We do the trick by creating a symbolink on the recipient, so the
+        # archive will decompress into it ;)
         ln -s "${install_dir}" "${zipdirname}"
         $UNZIP -q -o -d . "${zipfile}"
         rm "${zipdirname}"
@@ -217,18 +235,49 @@ function bootstrap_module () {
     install_dir="$4"
 
     # 1. Move to install_dir 
-    [ ! -d "${install_dir}" ] && $DO  mkdir -p "${install_dir}"
+    newdir_flag
+    if [ ! -d "${install_dir}" ]
+    then
+        $DO  mkdir -p "${install_dir}"
+        newdir_flag=1
+    fi
     $DO cd "${install_dir}" || die "Cannot cd:[${install_dir}] for installing module:[$module_name]"
 
     # 2. Retrieve remote distribution
     # $GIT_URL="ssh://git@github.com/franckporcher"
-    $DO $GIT clone --branch "${git_branch_name}" "$( git_url "${git_repos_name}" )" .
+    if [ -z "${newdir_flag}" ]
+    then
+        # OK (empty dir) - can clone directly into it
+        $DO $GIT clone --branch "${git_branch_name}" "$( git_url "${git_repos_name}" )" .   \
+            || die "Cannot git clone ${git_repos_name}/${git_branch_name} into . ($!)"
+
+        # Transfer ownership to WWW
+        dirname="$(basename "$(pwd)")"
+        chown -R "${WWWUID}:${WWWGID}" "../${dirname}"
+    else
+        # Directory already exists
+
+        # Create a .gitignore with everything present into it
+        ls -A > .gitignore
+        owner="$(file_owner .gitignore)"
+
+        # Clone git repository into a new temporary sub directory
+        tmpdir="__git_tmp_$(date "+%s")"
+        $DO $GIT clone --branch "${git_branch_name}" "$( git_url "${git_repos_name}" )" "${tmpdir}" \
+            || die "Cannot git clone ${git_repos_name}/${git_branch_name} into ${tmpdir} ($!)"
+        chown -R "${WWWUID}:${WWWGID}" "${tmpdir}"
+
+        # Move everything into current directory
+        mv ${tmpdir}/* .
+        mv ${tmpdir}/.[!.]* .
+        rm -rf "${tmpdir}"
+    fi
 
     # 3. REC 
-    $DO rec_bootstrap_module "${git_repos_name}"
+    $DO rec_bootstrap_module "${git_repos_name}"    || die "die: $!"
 
     # 4. Post bootstrap 
-    $DO _RUN_SCRIPT "${BOOTSTRAP_MODULE_POST}"
+    $DO _RUN_SCRIPT "${BOOTSTRAP_MODULE_POST}"      || die "die: $!"
 }
 
 

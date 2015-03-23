@@ -99,7 +99,8 @@ function bootstrap_module () {
 #
 function main() {
     # PHASE 1 : Install le chapeau
-    $DO bootstrap_module mutiny mutiny-www stable-v1.0 ~/mutiny-www-dev
+    top_module_name=mutiny
+    $DO bootstrap_module "${top_module_name}" mutiny-www stable-v1.0 ~/mutiny-www-dev || die "die: $!"
 
     # PHASE 2 : Bootstrap the remaining installation
     #           using the installed elements
@@ -107,9 +108,9 @@ function main() {
     then
         if [ -x ./boostrap.post.sh ] 
         then
-            $DO ./boostrap.post.sh
+            $DO ./boostrap.post.sh "${top_module_name}"         || die "die: $!"
         else 
-            $DO $BASH .boostrap.post.sh
+            $DO $BASH .boostrap.post.sh "${top_module_name}"    || die "die: $!"
         fi
     fi
 }

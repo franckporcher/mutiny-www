@@ -26,13 +26,13 @@ source "./management/utils.sh"
 #
 function main() {
     # Install the submodules
-    top_module="${MODULES[root]}"
-    $DO rec_bootstrap_module "${top_module}"
+    top_module="$1"                                 # also ${MODULES[root]}" --  top module name
+    $DO rec_bootstrap_module "${top_module}"        || die "die: $!"
 
     # INSTALL THE SQL STUFF
-    #$DO ./management/db.sh -i
-    #$DO ./management/db.sh -r ps psmutiny.init.sql
-    #$DO ./management/db.sh -r wp wpmutiny.init.sql
+    #$DO ./management/db.sh -i                      || die "die: $!" 
+    #$DO ./management/db.sh -r ps psmutiny.init.sql || die "die: $!" 
+    #$DO ./management/db.sh -r wp wpmutiny.init.sq  || die "die: $!"
 }
 
 main
