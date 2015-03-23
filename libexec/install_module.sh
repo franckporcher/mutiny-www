@@ -18,7 +18,7 @@
 SCRIPTNAME="$(basename "$0")"
 SCRIPTFQN="$(pwd)/$SCRIPTNAME"
 cd "$(dirname "$0")"
-source ".utils.sh"
+source "./utils.sh"
 
 ##
 # _install_module module_name
