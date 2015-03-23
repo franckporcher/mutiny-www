@@ -72,10 +72,10 @@ function _install_module () {
         # Transfer ownership to WWW
         $DO chown -R "${WWWUID}:${WWWGID}" "${install_dir}"
 
-    else # Recipient directory exists and may not be empty : not so good...
+    else # Recipient directory "${install_dir}" exists and may not be empty : not so good...
 
-        # Create a .gitignore with everything present into it
-        ls -A > .gitignore
+        # Create a .gitignore comprised of everything existing in that directory
+        ls -A "${install_dir}" > "${install_dir}/.gitignore"
 
         # Clone git repository into a new temporary sub directory
         tmpdir="__git_tmp_$(date "+%s")"

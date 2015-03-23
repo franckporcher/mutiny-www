@@ -25,9 +25,9 @@ function main() {
     module_name="$1"
 
     # INSTALL THE SQL STUFF
-    echo $DO _RUN_SCRIPT "${LIBEXEC}/db.sh" -i                      || die "db.sh died ($!)" 
-    echo $DO _RUN_SCRIPT "${LIBEXEC}/db.sh" -r ps psmutiny.init.sql || die "db.sh died ($!)" 
-    echo $DO _RUN_SCRIPT "${LIBEXEC}/db.sh" -r wp wpmutiny.init.sq  || die "db.sh died ($!)"
+    $DO _RUN_SCRIPT "${LIBEXEC}/db.sh" -i                      || die "db.sh died ($!)" 
+    $DO _RUN_SCRIPT "${LIBEXEC}/db.sh" -r ps psmutiny.init.sql || die "db.sh died ($!)" 
+    $DO _RUN_SCRIPT "${LIBEXEC}/db.sh" -r wp wpmutiny.init.sq  || die "db.sh died ($!)"
 }
 
 ${DO} main "$@"
