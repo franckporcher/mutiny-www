@@ -11,6 +11,13 @@
 # All rights reserved
 
 #----------------------------------------
+# BEGIN
+#----------------------------------------
+cd "$(dirname "$0")"
+SCRIPTNAME="$(basename "$0")"
+SCRIPTFQN="$(pwd)/$SCRIPTNAME"
+
+#----------------------------------------
 # DEBUG
 #----------------------------------------
 function log () {
@@ -25,19 +32,11 @@ function die () {
 }
 
 function do_log () {
-    log "PWD:[$(pwd)] CMD:[$*]"
+    log "[TRACE::$SCRIPTFQN (~/$(pwd))] --> $*"
     "$@"
 }
 
 DO=do_log
-   
-
-#----------------------------------------
-# BEGIN
-#----------------------------------------
-cd "$(dirname "$0")"
-SCRIPTNAME="$(basename "$0")"
-SCRIPTFQN="$(pwd)/$SCRIPTNAME"
 
 #----------------------------------------
 # TOOLS AVAILABILITY CHECKING
@@ -88,8 +87,8 @@ function main() {
     
     ##
     # STAGE 2 Bootstrap : Install hooks and submodules using the installed libexec
-    cd "$fresh_install_dir"
+    $DO cd "$fresh_install_dir"
     $DO ./libexec/install_module.sh -bootstrap || die "[main] $(pwd)/libexec/boostrap.post.sh died: $!"
 }
 
-main
+${DO} main "$@"

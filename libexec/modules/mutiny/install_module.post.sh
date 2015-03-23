@@ -30,4 +30,4 @@ function main() {
     echo $DO _RUN_SCRIPT "${LIBEXEC}/db.sh" -r wp wpmutiny.init.sq  || die "db.sh died ($!)"
 }
 
-main "$@"
+${DO} main "$@"

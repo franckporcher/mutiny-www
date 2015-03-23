@@ -18,8 +18,8 @@
 cd "$(dirname "$0")"
 SCRIPTNAME="$(basename "$0")"
 SCRIPTFQN="$(pwd)/$SCRIPTNAME"
-UTILS='./utils.sh'
 
+[ -z "${UTILS}" ] && UTILS="$(pwd)/utils.sh"
 if [ -e "${UTILS}" ]
 then
     source "${UTILS}"
@@ -70,7 +70,7 @@ function _install_module () {
             || die "[bootstrap_module] Cannot git clone:[${git_repos_name}/${git_branch_name}] into:["${install_dir}"] ($!)"
 
         # Transfer ownership to WWW
-        chown -R "${WWWUID}:${WWWGID}" "${install_dir}"
+        $DO chown -R "${WWWUID}:${WWWGID}" "${install_dir}"
 
     else # Recipient directory exists and may not be empty : not so good...
 
@@ -81,12 +81,12 @@ function _install_module () {
         tmpdir="__git_tmp_$(date "+%s")"
         $DO $GIT clone --branch "${git_branch_name}" "$( git_url "${git_repos_name}" )" "${tmpdir}" \
             || die "[bootstrap_module] Cannot git clone ${git_repos_name}/${git_branch_name} into ${tmpdir} ($!)"
-        chown -R "${WWWUID}:${WWWGID}" "${tmpdir}"
+        $DO chown -R "${WWWUID}:${WWWGID}" "${tmpdir}"
 
         # Move everything into install directory
         mv ${tmpdir}/*      "${install_dir}"
         mv ${tmpdir}/.[!.]* "${install_dir}"
-        rm -rf "${tmpdir}"
+        $DO rm -rf "${tmpdir}"
     fi
 }
 
@@ -141,12 +141,12 @@ function main() {
     then
         # 2nd stage boostrap only
         top_module_name="$(get_topmodule)"
-        _install_submodules "${top_module_name}"
+        ${DO} _install_submodules "${top_module_name}"
     else
         # Full 5 stages install
-        _install_module     "${module_name}"
-        _install_submodules "${module_name}"
+        ${DO} _install_module     "${module_name}"
+        ${DO} _install_submodules "${module_name}"
     fi
 }
 
-main "$@"
+${DO} main "$@"

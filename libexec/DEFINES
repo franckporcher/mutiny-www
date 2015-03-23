@@ -33,14 +33,14 @@ declare -A CURRENT_RELEASE
 # or a relative path from <topinstalldir>/libexec
 # (from where all the scripts run)
 INITIAL_RELEASE[mutiny]='    mutiny-www      stable-v1.0          ~/gitdeploy'
-INITIAL_RELEASE[wordpress]=' mutiny-www-wp   init-4.1.1-v1.0      ~gitdeploy'
-INITIAL_RELEASE[store]='     mutiny-www-ps   init-1.6.0.14-v1.0   ~gitdeploy/store'
-INITIAL_RELEASE[cgm]='       mutiny-www-cgm  stable-v1.0          ~gitdeploy/cgm'
+INITIAL_RELEASE[wordpress]=' mutiny-www-wp   init-4.1.1-v1.0      ~/gitdeploy'
+INITIAL_RELEASE[store]='     mutiny-www-ps   init-1.6.0.14-v1.0   ~/gitdeploy/store'
+INITIAL_RELEASE[cgm]='       mutiny-www-cgm  stable-v1.0          ~/gitdeploy/cgm'
 
 CURRENT_RELEASE[mutiny]='    mutiny-www      stable-v1.0          ~/gitdeploy'
-CURRENT_RELEASE[wordpress]=' mutiny-www-wp   init-4.1.1-v1.0      ~gitdeploy'
-CURRENT_RELEASE[store]='     mutiny-www-ps   init-1.6.0.14-v1.0   ~gitdeploy/store'
-CURRENT_RELEASE[cgm]='       mutiny-www-cgm  stable-v1.0          ~gitdeploy/cgm'
+CURRENT_RELEASE[wordpress]=' mutiny-www-wp   init-4.1.1-v1.0      ~/gitdeploy'
+CURRENT_RELEASE[store]='     mutiny-www-ps   init-1.6.0.14-v1.0   ~/gitdeploy/store'
+CURRENT_RELEASE[cgm]='       mutiny-www-cgm  stable-v1.0          ~/gitdeploy/cgm'
 
 
 #----------------------------------------

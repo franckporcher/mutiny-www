@@ -16,7 +16,7 @@ cd "$(dirname "$0")"
 SCRIPTNAME="$(basename "$0")"
 SCRIPTFQN="$(pwd)/$SCRIPTNAME"
 
-UTILS='./utils.sh'
+[ -z "${UTILS}" ] && UTILS="$(pwd)/utils.sh"
 
 if [ -e "${UTILS}" ]
 then
@@ -179,7 +179,7 @@ function main () {
             ;;
     esac
             
-    "${OP}" "${DB}" "${SQLFILE}"
+    $DO "${OP}" "${DB}" "${SQLFILE}"
 }
 
 main "$@"
