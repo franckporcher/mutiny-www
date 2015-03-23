@@ -4,7 +4,7 @@
 #
 # File to be SOURCED, not ran directly
 #
-# MUTINY_ROOT_INSTALL must be defined or taken as . as default
+# LIBEXEC must be defined or taken as . as default
 #
 # Copyright (C) 1995-2015 - Franck Porcher, Ph.D 
 # www.franckys.com
@@ -18,7 +18,7 @@ function log () {
 }
 
 function die () {
-    msg="[ERROR:$SCRIPTFQN] $*. Aborting!"
+    msg="[$SCRIPTFQN/$(pwd)] Error:: $*. Aborting!"
     echo "$msg" 1>&2
     log "$msg"
     exit 1
@@ -30,13 +30,11 @@ function do () {
 }
 
 function do_log () {
-    log "PWD:[$(pwd)] CMD:[$*]"
+    log "[$SCRIPTFQN/$(pwd)] --> $*"
     "$@"
 }
 
 function do_continue () {
-    local choice
-
 	echo "DO: $*" 1>&2
 	"$@"
 
@@ -64,16 +62,16 @@ DO=do_log
 #----------------------------------------
 # BEGIN
 #----------------------------------------
-[ -z "${MUTINY_ROOT_INSTALL}" ] && MUTINY_ROOT_INSTALL="$(pwd)"
-[ -z "${DEFINES}" ]             && DEFINES="${MUTINY_ROOT_INSTALL}/management/DEFINES"
-[ -z "${UTILS}" ]               && UTILS="${MUTINY_ROOT_INSTALL}/management/utils.sh"
-export MUTINY_ROOT_INSTALL DEFINES UTILS
+[ -z "${LIBEXEC}" ] && LIBEXEC="$(dirname "$0")"
+[ -z "${DEFINES}" ] && DEFINES="${LIBEXEC}/DEFINES"
+[ -z "${UTILS}" ]   && UTILS="${LIBEXEC}/utils.sh"
+export LIBEXEC DEFINES UTILS
 
 if [ -e "${DEFINES}" ]
 then
     source "${DEFINES}"
 else
-    die "[utils.sh] Cannot locate mandatory dependancy:[${DEFINES}]"
+    die "[${UTILS} Cannot locate mandatory dependancy:[${DEFINES}]"
 fi
 
 #----------------------------------------
@@ -88,8 +86,7 @@ fi
 #   
 #----------------------------------------
 ##
-#
-#__bootstrap REALPATH realpath __realpath
+#__bootstrap CMD unixcmd __shellfunction
 #
 function __bootstrap() {
     util_ref_name="$1"
@@ -104,6 +101,7 @@ function __bootstrap() {
 
 ##
 # __nocmd cmd arg...
+#
 function __nocmd () {
     cmd="$1"
     die "Unknown command: ${cmd} [$*]"
@@ -147,16 +145,21 @@ __bootstrap UNZIP unzip __unzip
 # HELPERS
 #----------------------------------------
 function _RUN_SCRIPT () {
-    script="$1"
-    shift
+    script="$1"; shift
 
     if [ -e "${script}" ]
     then
         if [ -x "${script}" ] 
         then
-            $DO "${script}" "$@"
+            LIBEXEC="${LIBEXEC}" \
+            DEFINES="${DEFINES}" \
+            UTILS="${UTILS}" \
+                $DO "${script}" "$@"
         else 
-            $DO $BASH "${script}" "$@"
+            LIBEXEC="${LIBEXEC}" \
+            DEFINES="${DEFINES}" \
+            UTILS="${UTILS}" \
+                $DO $BASH "${script}" "$@"
         fi
     fi
 }
@@ -164,15 +167,77 @@ function _RUN_SCRIPT () {
 #----------------------------------------
 # FILE STUFF
 #----------------------------------------
-
 #owner=$( file_owner file )
 function file_owner () {
     ls -ld "$1" | $AWK '{print $3}'
 }
 
+# script_pre = $(get_pre script.sh modulename)
+function get_pre () {
+    scriptname="$1"
+    modulename="$2"
+
+    echo "${LIBEXEC}/modules/${modulename}/$(basename "${scriptname}" .sh).pre.sh"
+}
+
+# script_post = $(get_post script.sh modulename)
+function get_post () {
+    scriptname="$1"
+    modulename="$2"
+
+    echo "${LIBEXEC}/modules/${modulename}/$(basename "${scriptname}" .sh).post.sh"
+}
+
+# script_middle = $(get_mid script.sh modulename)
+function get_mid () {
+    scriptname="$1"
+    modulename="$2"
+
+    echo "${LIBEXEC}/modules/${modulename}/$(basename "${scriptname}" .sh).mid.sh"
+}
+
 #----------------------------------------
 # GITHUB STUFF
 #----------------------------------------
+
+##
+# module_specs=$(get_module_specs module_name)
+#
+function get_module_specs () {
+    module_name="$1"
+    specs="${INITIAL_RELEASE["${module_name}"]}"
+    set $specs
+    [ $# -ne 3 ] && die "Invalid module spec:[$specs]"
+    repos_name="$1"
+    branch_name="$2"
+    eval "install_dir=$3"   # for possible ~ expansion
+    echo "$repos_name" "$branch_name" "$install_dir"
+}
+
+##
+# top_module=$(get_topmodule)
+#
+function get_topmodule () {
+    echo "${MODULES[root]}"
+}
+
+##
+# submodules_list=$(get_submodules_list module_name)
+#
+function get_submodules_list () {
+    module_name="$1"
+    echo "${MODULES["${module_name}"]}"
+}
+
+##
+# git_url=$(git_url repos_name)
+#
+# Clone into a given dir the reference repository
+# for a given module
+# 
+function git_url () {
+    echo "${GIT_URL}/${1}.git"
+}
 
 ##
 # Download a zip from a github repository and install it
@@ -212,100 +277,3 @@ function install_git_distribution () {
     fi
 }
 
-##
-# git_url=$(git_url repos_name)
-#
-# Clone into a given dir the reference repository
-# for a given module
-# 
-function git_url () {
-    echo "${GIT_URL}/${1}.git"
-}
-
-##
-# bootstrap_module module_name git_repos_name git_branch_name install_dir
-#
-# Clone into a given dir the reference repository
-# for a given module
-# 
-function bootstrap_module () {
-    module_name="$1"
-    git_repos_name="$2"
-    git_branch_name="$3"
-    install_dir="$4"
-
-    # 1. Move to install_dir 
-    if [ -d "${install_dir}" ]
-    then
-        nodir_flag=
-    else
-        nodir_flag=1
-    fi
-
-    # 2. Retrieve remote distribution
-    # $GIT_URL="ssh://git@github.com/franckporcher"
-    if [ -n "${nodir_flag}" ]
-    then # Recipient directory does not not exists : good !
-        $DO $GIT clone --branch "${git_branch_name}" "$( git_url "${git_repos_name}" )" "${install_dir}"   \
-            || die "[bootstrap_module] Cannot git clone ${git_repos_name}/${git_branch_name} into "${install_dir}" ($!)"
-
-        # Transfer ownership to WWW
-        dirname="$(basename "$(pwd)")"
-        chown -R "${WWWUID}:${WWWGID}" "${install_dir}"
-
-    else # Recipient directory exists and may not be empty : not so good...
-
-        # Create a .gitignore with everything present into it
-        ls -A > .gitignore
-        owner="$(file_owner .gitignore)"
-
-        # Clone git repository into a new temporary sub directory
-        tmpdir="__git_tmp_$(date "+%s")"
-        $DO $GIT clone --branch "${git_branch_name}" "$( git_url "${git_repos_name}" )" "${tmpdir}" \
-            || die "[bootstrap_module] Cannot git clone ${git_repos_name}/${git_branch_name} into ${tmpdir} ($!)"
-        chown -R "${WWWUID}:${WWWGID}" "${tmpdir}"
-
-        # Move everything into install directory
-        mv ${tmpdir}/*      "${install_dir}"
-        mv ${tmpdir}/.[!.]* "${install_dir}"
-        rm -rf "${tmpdir}"
-    fi
-
-    # 3. REC 
-    $DO rec_bootstrap_module "${git_repos_name}"    || die "[bootstrap_module] rec_bootstrap_module died: $!"
-
-    # 4. Post bootstrap 
-    MUTINY_ROOT_INSTALL="${MUTINY_ROOT_INSTALL}" \
-    DEFINES="${DEFINES}" \
-    UTILS="${UTILS}" \
-    $DO _RUN_SCRIPT "${BOOTSTRAP_MODULE_POST}"      || die "_RUN_SCRIPT ${BOOTSTRAP_MODULE_POST} died: $!"
-}
-
-
-##
-# rec_bootstrap_module module_name
-#
-# Clone into a given dir the reference repository
-# for a given module
-
-# rec_bootstrap_module module_name
-# 
-function rec_bootstrap_module () {
-    module_name="$1"
-
-    [ -z "${module_name}" ] && die "[rec_bootstrap_module] Usage: rec_bootstrap_module <module_name>"
-
-    # 1. Get the repository name and the branch name to fetch
-    for submodule in ${MODULES["${module_name}"]}
-    do
-        set ${INITIAL_RELEASE["${submodule}"]}
-        if [ $# -eq 3 ]
-        then
-            eval "install_dir=$3"   # for possible ~ expansion
-            pushd . &> /dev/null
-            $DO bootstrap_module "${submodule}" "$1" "$2" "${install_dir}"
-            popd &> /dev/null
-        fi
-    done
-}
-    

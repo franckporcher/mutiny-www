@@ -29,12 +29,12 @@ declare -A INITIAL_RELEASE
 declare -A CURRENT_RELEASE
 
 # moduleName > ReposName:BranchName:InstallDir
-INITIAL_RELEASE[mutiny]='mutiny-www stable-v1.0 ~/mutiny-www-dev'
+INITIAL_RELEASE[mutiny]='mutiny-www stable-v1.0 ~/gitdeploy'
 INITIAL_RELEASE[wordpress]='mutiny-www-wp init-4.1.1-v1.0 .'
 INITIAL_RELEASE[store]='mutiny-www-ps init-1.6.0.14-v1.0 store'
 INITIAL_RELEASE[cgm]='mutiny-www-cgm stable-v1.0 cgm'
 
-CURRENT_RELEASE[mutiny]='mutiny-www stable-v1.0 ~/mutiny-www-dev'
+CURRENT_RELEASE[mutiny]='mutiny-www stable-v1.0 ~/gitdeploy'
 CURRENT_RELEASE[wordpress]='mutiny-www-wp init-4.1.1-v1.0 .'
 CURRENT_RELEASE[store]='mutiny-www-ps init-1.6.0.14-v1.0 store'
 CURRENT_RELEASE[cgm]='mutiny-www-cgm stable-v1.0 cgm'
@@ -61,10 +61,7 @@ WWWGID='_www'
 #----------------------------------------
 # INSTALLATION HELPERS
 #----------------------------------------
-BOOTSTRAP_MODULE='./bootstrap.sh'
-BOOTSTRAP_MODULE_POST='./bootstrap.post.sh'
-
-UPDATE_MODULE='./install_module.sh'
-UPDATE_MODULE_PRE='./install_module.pre.sh'
-UPDATE_MODULE_POST='./install_module.post.sh'
+BOOTSTRAP_MODULE='bootstrap.sh'
+INSTALL_MODULE='install_module.sh'
+UPDATE_MODULE='update_module.sh'
 

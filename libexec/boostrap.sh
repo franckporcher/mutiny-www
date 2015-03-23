@@ -18,7 +18,7 @@ function log () {
 }
 
 function die () {
-    msg="[ERROR:$SCRIPTFQN] $*. Aborting!"
+    msg="[$SCRIPTFQN/$(pwd)] Error:: $*. Aborting!"
     echo "$msg" 1>&2
     log "$msg"
     exit 1
@@ -69,7 +69,7 @@ function __nocmd () {
 #
 __bootstrap GIT git __git
     function __git () {
-        echo "$1"
+        __nocmd git "$*"
     }
 
 #----------------------------------------
@@ -79,7 +79,6 @@ __bootstrap GIT git __git
 ##
 # Locally clone the reference repository gor the given module
 #
-# install_github_branch INSTALLDIR (. by default)
 function bootstrap_module () {
     module_name="$1"
     git_repos_name="$2"
@@ -88,7 +87,7 @@ function bootstrap_module () {
 
     # 1. Move to install_dir 
     [ ! -d "${install_dir}" ] &&  $DO mkdir -p "${install_dir}"
-    $DO cd "${install_dir}" || die "Cannot cd:[${install_dir}] for installing module:[$module_name]"
+    $DO cd "${install_dir}" || die "Cannot cd:[${install_dir}] for bootstrapping module:[$module_name]"
 
     # 2. Retrieve remote distribution
     $DO $GIT clone --branch "${git_branch_name}" "ssh://git@github.com/franckporcher/${git_repos_name}.git" .
@@ -98,21 +97,12 @@ function bootstrap_module () {
 # main
 #
 function main() {
-    # PHASE 1 : Install le chapeau
+    # Stage 1 Bootstrap : Install le chapeau
     top_module_name=mutiny
-    $DO bootstrap_module "${top_module_name}" mutiny-www stable-v1.0 ~/mutiny-www-dev || die "die: $!"
+    $DO bootstrap_module "${top_module_name}" mutiny-www stable-v1.0 ~/gitdeploy || die "bootstrap_module died: $!"
 
-    # PHASE 2 : Bootstrap the remaining installation
-    #           using the installed elements
-    if [ -e ./boostrap.post.sh ]
-    then
-        if [ -x ./boostrap.post.sh ] 
-        then
-            $DO ./boostrap.post.sh "${top_module_name}"         || die "die: $!"
-        else 
-            $DO $BASH .boostrap.post.sh "${top_module_name}"    || die "die: $!"
-        fi
-    fi
+    # STAGE 2 Bootstrap : Install hooks and submodules using the installed libexec
+    $DO ./libexec/install_module.sh -bootstrap || die "[main] ./libexec/boostrap.post.sh died: $!"
 }
 
 main
