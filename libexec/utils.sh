@@ -18,7 +18,7 @@ function log () {
 }
 
 function die () {
-    msg="[$SCRIPTFQN/$(pwd)] Error:: $*. Aborting!"
+    msg="[$SCRIPTFQN (~$(pwd))] Error:: $*. Aborting!"
     echo "$msg" 1>&2
     log "$msg"
     exit 1

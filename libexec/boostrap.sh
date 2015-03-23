@@ -99,10 +99,14 @@ function bootstrap_module () {
 function main() {
     # Stage 1 Bootstrap : Install le chapeau
     top_module_name=mutiny
-    $DO bootstrap_module "${top_module_name}" mutiny-www stable-v1.0 ~/gitdeploy || die "bootstrap_module died: $!"
+    git_repos_name=mutiny-www       # Also the dir where the clone will be installed (where to cd)
+    git_branch_name=stable-v1.0 
+    fresh_install_dir=~/gitdeploy
+    $DO bootstrap_module "${top_module_name}" "$git_repos_name" "$git_branch_name" "$fresh_install_dir" || die "bootstrap_module died: $!"
 
     # STAGE 2 Bootstrap : Install hooks and submodules using the installed libexec
-    $DO ./libexec/install_module.sh -bootstrap || die "[main] ./libexec/boostrap.post.sh died: $!"
+    cd "$git_repos_name"
+    $DO ./libexec/install_module.sh -bootstrap || die "[main] $(pwd)/libexec/boostrap.post.sh died: $!"
 }
 
 main
