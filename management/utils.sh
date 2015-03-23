@@ -65,9 +65,9 @@ DO=do_log
 # BEGIN
 #----------------------------------------
 [ -z "${MUTINY_ROOT_INSTALL}" ] && MUTINY_ROOT_INSTALL="$(pwd)"
-export MUTINY_ROOT_INSTALL
-
-DEFINES="${MUTINY_ROOT_INSTALL}/management/DEFINES"
+[ -z "${DEFINES}" ]             && DEFINED="${MUTINY_ROOT_INSTALL}/management/DEFINES"
+[ -z "${UTILS}" ]               && UTILS="${MUTINY_ROOT_INSTALL}/management/utils.sh"
+export MUTINY_ROOT_INSTALL DEFINES UTILS
 
 if [ -e "${DEFINES}" ]
 then
@@ -277,6 +277,9 @@ function bootstrap_module () {
     $DO rec_bootstrap_module "${git_repos_name}"    || die "die: $!"
 
     # 4. Post bootstrap 
+    MUTINY_ROOT_INSTALL="${MUTINY_ROOT_INSTALL}" \
+    DEFINES="${DEFINES}" \
+    UTILS="${UTILS}" \
     $DO _RUN_SCRIPT "${BOOTSTRAP_MODULE_POST}"      || die "die: $!"
 }
 
@@ -292,7 +295,7 @@ function bootstrap_module () {
 function rec_bootstrap_module () {
     module_name="$1"
 
-    [ -z "${module_name}" ] && return
+    [ -z "${module_name}" ] && die "Usage: rec_bootstrap_module <module_name>"
 
     # 1. Get the repository name and the branch name to fetch
     for submodule in ${MODULES["${module_name}"]}
@@ -308,4 +311,3 @@ function rec_bootstrap_module () {
     done
 }
     
-
