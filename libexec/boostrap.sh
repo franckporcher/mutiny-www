@@ -18,7 +18,7 @@ function log () {
 }
 
 function die () {
-    msg="[$SCRIPTFQN/$(pwd)] Error:: $*. Aborting!"
+    msg="[$SCRIPTFQN (~$(pwd))] Error:: $*. Aborting!"
     echo "$msg" 1>&2
     log "$msg"
     exit 1
@@ -72,40 +72,25 @@ __bootstrap GIT git __git
         __nocmd git "$*"
     }
 
+
 #----------------------------------------
-# GITHUB STUFF
-#----------------------------------------
-
-##
-# Locally clone the reference repository gor the given module
-#
-function bootstrap_module () {
-    module_name="$1"
-    git_repos_name="$2"
-    git_branch_name="$3"
-    install_dir="$4"
-
-    # 1. Move to install_dir 
-    [ ! -d "${install_dir}" ] &&  $DO mkdir -p "${install_dir}"
-    $DO cd "${install_dir}" || die "Cannot cd:[${install_dir}] for bootstrapping module:[$module_name]"
-
-    # 2. Retrieve remote distribution
-    $DO $GIT clone --branch "${git_branch_name}" "ssh://git@github.com/franckporcher/${git_repos_name}.git" .
-}
-
-#
 # main
-#
+#----------------------------------------
 function main() {
+    ##
     # Stage 1 Bootstrap : Install le chapeau
-    top_module_name=mutiny
-    git_repos_name=mutiny-www       # Also the dir where the clone will be installed (where to cd)
+    git_repos_name=mutiny-www
     git_branch_name=stable-v1.0 
     fresh_install_dir=~/gitdeploy
-    $DO bootstrap_module "${top_module_name}" "$git_repos_name" "$git_branch_name" "$fresh_install_dir" || die "bootstrap_module died: $!"
 
+
+    $DO $GIT clone --branch "${git_branch_name}"
+    "ssh://git@github.com/franckporcher/${git_repos_name}.git" "$fresh_install_dir" \
+        die "bootstrap_module died: $!"
+    
+    ##
     # STAGE 2 Bootstrap : Install hooks and submodules using the installed libexec
-    cd "$git_repos_name"
+    cd "$fresh_install_dir"
     $DO ./libexec/install_module.sh -bootstrap || die "[main] $(pwd)/libexec/boostrap.post.sh died: $!"
 }
 
