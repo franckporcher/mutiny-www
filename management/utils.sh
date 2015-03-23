@@ -235,27 +235,25 @@ function bootstrap_module () {
     install_dir="$4"
 
     # 1. Move to install_dir 
-    newdir_flag
-    if [ ! -d "${install_dir}" ]
+    if [ -d "${install_dir}" ]
     then
-        $DO  mkdir -p "${install_dir}"
-        newdir_flag=1
+        nodir_flag=
+    else
+        nodir_flag=1
     fi
-    $DO cd "${install_dir}" || die "[bootstrap_module] Cannot cd:[${install_dir}] for installing module:[$module_name]"
 
     # 2. Retrieve remote distribution
     # $GIT_URL="ssh://git@github.com/franckporcher"
-    if [ -z "${newdir_flag}" ]
-    then
-        # OK (empty dir) - can clone directly into it
-        $DO $GIT clone --branch "${git_branch_name}" "$( git_url "${git_repos_name}" )" .   \
-            || die "[bootstrap_module] Cannot git clone ${git_repos_name}/${git_branch_name} into . ($!)"
+    if [ -n "${nodir_flag}" ]
+    then # Recipient directory does not not exists : good !
+        $DO $GIT clone --branch "${git_branch_name}" "$( git_url "${git_repos_name}" )" "${install_dir}"   \
+            || die "[bootstrap_module] Cannot git clone ${git_repos_name}/${git_branch_name} into "${install_dir}" ($!)"
 
         # Transfer ownership to WWW
         dirname="$(basename "$(pwd)")"
-        chown -R "${WWWUID}:${WWWGID}" "../${dirname}"
-    else
-        # Directory already exists
+        chown -R "${WWWUID}:${WWWGID}" "${install_dir}"
+
+    else # Recipient directory exists and may not be empty : not so good...
 
         # Create a .gitignore with everything present into it
         ls -A > .gitignore
@@ -267,9 +265,9 @@ function bootstrap_module () {
             || die "[bootstrap_module] Cannot git clone ${git_repos_name}/${git_branch_name} into ${tmpdir} ($!)"
         chown -R "${WWWUID}:${WWWGID}" "${tmpdir}"
 
-        # Move everything into current directory
-        mv ${tmpdir}/* .
-        mv ${tmpdir}/.[!.]* .
+        # Move everything into install directory
+        mv ${tmpdir}/*      "${install_dir}"
+        mv ${tmpdir}/.[!.]* "${install_dir}"
         rm -rf "${tmpdir}"
     fi
 
