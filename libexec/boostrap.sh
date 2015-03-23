@@ -84,8 +84,7 @@ function main() {
     fresh_install_dir=~/gitdeploy
 
 
-    $DO $GIT clone --branch "${git_branch_name}"
-    "ssh://git@github.com/franckporcher/${git_repos_name}.git" "$fresh_install_dir" \
+    $DO $GIT clone --branch "${git_branch_name}" "ssh://git@github.com/franckporcher/${git_repos_name}.git" "$fresh_install_dir" \
         die "bootstrap_module died: $!"
     
     ##
