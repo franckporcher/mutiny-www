@@ -22,7 +22,7 @@ if [ -e "${UTILS}" ]
 then
     source "${UTILS}"
 else
-    msg="[ERROR:$SCRIPTFQN] Cannot locate mandatory dependancy: ${UTILS}. Cancelling!"
+    msg="[ERROR::$SCRIPTFQN (~$(pwd))] Cannot locate mandatory dependancy: ${UTILS}. Aborting!"
     echo "$msg" 1>&2
     logger -s -t "$SCRIPTNAME" "$*"
     exit 1

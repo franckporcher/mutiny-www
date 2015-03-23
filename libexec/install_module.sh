@@ -15,10 +15,20 @@
 #----------------------------------------
 # BEGIN
 #----------------------------------------
+cd "$(dirname "$0")"
 SCRIPTNAME="$(basename "$0")"
 SCRIPTFQN="$(pwd)/$SCRIPTNAME"
-cd "$(dirname "$0")"
-source "./utils.sh"
+UTILS='./utils.sh'
+
+if [ -e "${UTILS}" ]
+then
+    source "${UTILS}"
+else
+    msg="[ERROR::$SCRIPTFQN (~$(pwd))] Cannot locate mandatory dependancy: ${UTILS}. Aborting!"
+    echo "$msg" 1>&2
+    logger -s -t "$SCRIPTNAME" "$*"
+    exit 1
+fi
 
 ##
 # _install_module module_name

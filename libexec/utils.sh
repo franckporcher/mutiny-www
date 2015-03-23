@@ -18,7 +18,7 @@ function log () {
 }
 
 function die () {
-    msg="[$SCRIPTFQN (~$(pwd))] Error:: $*. Aborting!"
+    msg="[ERROR::$SCRIPTFQN (~$(pwd))] $*. Aborting!"
     echo "$msg" 1>&2
     log "$msg"
     exit 1
@@ -30,7 +30,7 @@ function do () {
 }
 
 function do_log () {
-    log "[$SCRIPTFQN/$(pwd)] --> $*"
+    log "[TRACE::$SCRIPTFQN (~/$(pwd))] --> $*"
     "$@"
 }
 
@@ -62,7 +62,9 @@ DO=do_log
 #----------------------------------------
 # BEGIN
 #----------------------------------------
-[ -z "${LIBEXEC}" ] && LIBEXEC="$(dirname "$0")"
+[ -z "${LIBEXEC}" ] && LIBEXEC="$(pwd)"             # $(pwd) because at this stage we must be positionned
+                                                    # INSIDE the libexec directory by the caller, 
+                                                    # who is supposed to have done a cd $(dirname $0)
 [ -z "${DEFINES}" ] && DEFINES="${LIBEXEC}/DEFINES"
 [ -z "${UTILS}" ]   && UTILS="${LIBEXEC}/utils.sh"
 export LIBEXEC DEFINES UTILS
