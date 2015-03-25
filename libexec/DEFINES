@@ -53,7 +53,7 @@ CURRENT_RELEASE[cgm]="       mutiny-www-cgm  stable-v1.0            /srv/www/mut
 # MYSQL DB CREDENTIALS
 #----------------------------------------
 #SQL_DBSERVER=devsql.mutinytahiti.com
-eval "SQL_DBSERVER='$(grep -m 1 -E 'SetEnv.+DBSERVER' /etc/apache2/sites-enabled/mutiny.conf | awk '{print $3}')'"
+eval "SQL_DBSERVER=$(grep -m 1 -E 'SetEnv.+DBSERVER' /etc/apache2/sites-enabled/mutiny.conf | awk '{print $3}')"
 [ -z "${SQL_DBSERVER}" ]  && SQL_DBSERVER="devsql.mutinytahiti.com"
 
 SQL_ROOT=root
