@@ -27,7 +27,8 @@ WWWGID='www-data'
 #----------------------------------------
 # GIT STUFF 
 #----------------------------------------
-GIT_URL="ssh://git@github.com/franckporcher"
+#GIT_URL="ssh://git@github.com/franckporcher"
+GIT_URL="https://git@github.com/franckporcher"
 
 # Git Modules
 declare -A INITIAL_RELEASE
@@ -37,17 +38,23 @@ declare -A CURRENT_RELEASE
 # InstallDir shoudl be either an absolute path,
 # or a relative path from <topinstalldir>/libexec
 # (from where all the scripts run)
-INITIAL_RELEASE[mutiny]="    mutiny-www      stable-v1.0            ~${WWWUID}/mutiny"
-INITIAL_RELEASE[wordpress]=" mutiny-www-wp   init-4.1.1-v1.0        ~${WWWUID}/mutiny"
-INITIAL_RELEASE[store]="     mutiny-www-ps   init-1.6.0.14-v1.0     ~${WWWUID}/mutiny/store"
-INITIAL_RELEASE[cgm]="       mutiny-www-cgm  stable-v1.0            ~${WWWUID}/mutiny/cgm"
+INITIAL_RELEASE[mutiny]="    mutiny-www      stable-v1.0            /srv/www/mutiny/current"
+INITIAL_RELEASE[wordpress]=" mutiny-www-wp   init-4.1.1-v1.0        /srv/www/mutiny/current"
+INITIAL_RELEASE[store]="     mutiny-www-ps   init-1.6.0.14-v1.0     /srv/www/mutiny/current/store"
+INITIAL_RELEASE[cgm]="       mutiny-www-cgm  stable-v1.0            /srv/www/mutiny/current/cgm"
+
+CURRENT_RELEASE[mutiny]="    mutiny-www      stable-v1.0            /srv/www/mutiny/current"
+CURRENT_RELEASE[wordpress]=" mutiny-www-wp   init-4.1.1-v1.0        /srv/www/mutiny/current"
+CURRENT_RELEASE[store]="     mutiny-www-ps   init-1.6.0.14-v1.0     /srv/www/mutiny/current/store"
+CURRENT_RELEASE[cgm]="       mutiny-www-cgm  stable-v1.0            /srv/www/mutiny/current/cgm"
 
 
 #----------------------------------------
 # MYSQL DB CREDENTIALS
 #----------------------------------------
 #SQL_DBSERVER=devsql.mutinytahiti.com
-SQL_DBSERVER='mutiny-staging-rds.cfwvxsax91fg.us-east-1.rds.amazonaws.com'
+eval "SQL_DBSERVER='$(grep -m 1 -E 'SetEnv.+DBSERVER' /etc/apache2/sites-enabled/mutiny.conf | awk '{print $3}')'"
+[ -z "${SQL_DBSERVER}" ]  && SQL_DBSERVER="devsql.mutinytahiti.com"
 
 SQL_ROOT=root
 SQL_DBADMIN='mutiny_db_admin'
