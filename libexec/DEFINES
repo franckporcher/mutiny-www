@@ -18,6 +18,11 @@ declare -A MODULES
 MODULES[root]='mutiny'
 MODULES[mutiny]='wordpress store cgm'
 
+#----------------------------------------
+# WEB SERVER CREDENTIALS
+#----------------------------------------
+WWWUID='www-data'
+WWWGID='www-data'
 
 #----------------------------------------
 # GIT STUFF 
@@ -32,21 +37,17 @@ declare -A CURRENT_RELEASE
 # InstallDir shoudl be either an absolute path,
 # or a relative path from <topinstalldir>/libexec
 # (from where all the scripts run)
-INITIAL_RELEASE[mutiny]='    mutiny-www      stable-v1.0          ~/gitdeploy'
-INITIAL_RELEASE[wordpress]=' mutiny-www-wp   init-4.1.1-v1.0      ~/gitdeploy'
-INITIAL_RELEASE[store]='     mutiny-www-ps   init-1.6.0.14-v1.0   ~/gitdeploy/store'
-INITIAL_RELEASE[cgm]='       mutiny-www-cgm  stable-v1.0          ~/gitdeploy/cgm'
-
-CURRENT_RELEASE[mutiny]='    mutiny-www      stable-v1.0          ~/gitdeploy'
-CURRENT_RELEASE[wordpress]=' mutiny-www-wp   init-4.1.1-v1.0      ~/gitdeploy'
-CURRENT_RELEASE[store]='     mutiny-www-ps   init-1.6.0.14-v1.0   ~/gitdeploy/store'
-CURRENT_RELEASE[cgm]='       mutiny-www-cgm  stable-v1.0          ~/gitdeploy/cgm'
+INITIAL_RELEASE[mutiny]="    mutiny-www      stable-v1.0            ~${WWWUID}/mutiny"
+INITIAL_RELEASE[wordpress]=" mutiny-www-wp   init-4.1.1-v1.0        ~${WWWUID}/mutiny"
+INITIAL_RELEASE[store]="     mutiny-www-ps   init-1.6.0.14-v1.0     ~${WWWUID}/mutiny/store"
+INITIAL_RELEASE[cgm]="       mutiny-www-cgm  stable-v1.0            ~${WWWUID}/mutiny/cgm"
 
 
 #----------------------------------------
 # MYSQL DB CREDENTIALS
 #----------------------------------------
-SQL_DBSERVER=devsql.mutinytahiti.com
+#SQL_DBSERVER=devsql.mutinytahiti.com
+SQL_DBSERVER='mutiny-staging-rds.cfwvxsax91fg.us-east-1.rds.amazonaws.com'
 
 SQL_ROOT=root
 SQL_DBADMIN='mutiny_db_admin'
@@ -55,11 +56,6 @@ SQL_DBADMIN_PWD='AmantesIslaUnidos'
 SQL_PSDB=psmutiny
 SQL_WPDB=wpmutiny
 
-#----------------------------------------
-# WEB SERVER CREDENTIALS
-#----------------------------------------
-WWWUID='_www'
-WWWGID='_www'
 
 #----------------------------------------
 # INSTALLATION HELPERS

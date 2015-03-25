@@ -113,15 +113,15 @@ shift $((OPTIND - 1))
 #----------------------------------------
 # _mysql_dump_db DB SQLFILE
 function _mysql_dump_db () {
-    DBNAME="$1"
-    SQLFILE="$2"
+    local DBNAME="$1"
+    local SQLFILE="$2"
     [ -z "${SQLFILE}" ] && SQLFILE="${DBNAME}.sql"
     ${DO} mysqldump "--host=${SQL_DBSERVER}" -u "${SQL_DBADMIN}" "--password=${SQL_DBADMIN_PWD}" "${DBNAME}" > "${SQLFILE}"
 }
 
 function _mysql_restore_db () {
-    DBNAME="$1"
-    SQLFILE="$2"
+    local DBNAME="$1"
+    local SQLFILE="$2"
     [ -z "${SQLFILE}" ] && SQLFILE="${DBNAME}.sql"
     if [ -e "${SQLFILE}" ]
     then 
@@ -132,7 +132,7 @@ function _mysql_restore_db () {
 }
 
 function _mysql_reset_db () {
-    DBNAME="$1"
+    local DBNAME="$1"
     ${DO} mysql --force "--host=${SQL_DBSERVER}" -u "${SQL_ROOT}" -p <<-EOT
         DROP DATABASE ${DBNAME};
         CREATE DATABASE ${DBNAME} CHARSET utf8 COLLATE 'utf8_general_ci';
@@ -167,7 +167,7 @@ EOT
 function main () {
     [ -z "${OP}" ] && help && exit 0;
 
-    SQLFILE="$1"
+    local SQLFILE="$1"
 
     case "$DB" in
         ps) DB="${SQL_PSDB}"

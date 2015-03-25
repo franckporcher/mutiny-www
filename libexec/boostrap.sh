@@ -25,7 +25,7 @@ function log () {
 }
 
 function die () {
-    msg="[ERROR::$SCRIPTFQN (~$(pwd))] $*. Aborting!"
+    local msg="[ERROR::$SCRIPTFQN (~$(pwd))] $*. Aborting!"
     echo "$msg" 1>&2
     log "$msg"
     exit 1
@@ -46,11 +46,11 @@ DO=do_log
 #__bootstrap REALPATH realpath __realpath
 #
 function __bootstrap() {
-    util_ref_name="$1"
-    util_real_name="$2"
-    util_bs_name="$3"
+    local util_ref_name="$1"
+    local util_real_name="$2"
+    local util_bs_name="$3"
 
-    _path="$(which "${util_real_name}")"
+    local _path="$(which "${util_real_name}")"
     [ -z "${_path}" ] && _path="${util_bs_name}"
 
     eval "${util_ref_name}='${_path}'"
@@ -59,7 +59,7 @@ function __bootstrap() {
 ##
 # __nocmd cmd arg...
 function __nocmd () {
-    cmd="$1"
+    local cmd="$1"
     die "Unknown command: ${cmd} [$*]"
 }
 
@@ -78,9 +78,9 @@ __bootstrap GIT git __git
 function main() {
     ##
     # Stage 1 Bootstrap : Install le chapeau
-    git_repos_name=mutiny-www
-    git_branch_name=stable-v1.0 
-    fresh_install_dir=~/gitdeploy
+    local git_repos_name=mutiny-www
+    local git_branch_name=stable-v1.0 
+    local fresh_install_dir=~/gitdeploy
 
 
     $DO $GIT clone --branch "${git_branch_name}" "ssh://git@github.com/franckporcher/${git_repos_name}.git" "$fresh_install_dir" || die "bootstrap_module died: $!"

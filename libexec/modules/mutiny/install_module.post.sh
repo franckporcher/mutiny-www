@@ -22,7 +22,7 @@ source "$UTILS"
 #----------------------------------------
 function main() {
     # Install the submodules
-    module_name="$1"
+    local module_name="$1"
 
     # INSTALL THE SQL STUFF
     $DO _RUN_SCRIPT "${LIBEXEC}/db.sh" -i                      || die "db.sh died ($!)" 

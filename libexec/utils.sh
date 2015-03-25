@@ -18,7 +18,7 @@ function log () {
 }
 
 function die () {
-    msg="[ERROR::$SCRIPTFQN (~$(pwd))] $*. Aborting!"
+    local msg="[ERROR::$SCRIPTFQN (~$(pwd))] $*. Aborting!"
     echo "$msg" 1>&2
     log "$msg"
     exit 1
@@ -39,6 +39,7 @@ function do_continue () {
 	"$@"
 
     echo -n "Continue: [N/y]> " 1>&2
+    local choice
     read choice
 
     if [ "$choice" == "y" ]
@@ -91,11 +92,11 @@ fi
 #__bootstrap CMD unixcmd __shellfunction
 #
 function __bootstrap() {
-    util_ref_name="$1"
-    util_real_name="$2"
-    util_bs_name="$3"
+    local util_ref_name="$1"
+    local util_real_name="$2"
+    local util_bs_name="$3"
 
-    _path="$(which "${util_real_name}")"
+    local _path="$(which "${util_real_name}")"
     [ -z "${_path}" ] && _path="${util_bs_name}"
 
     eval "${util_ref_name}='${_path}'"
@@ -105,7 +106,7 @@ function __bootstrap() {
 # __nocmd cmd arg...
 #
 function __nocmd () {
-    cmd="$1"
+    local cmd="$1"
     die "Unknown command: ${cmd} [$*]"
 }
 
@@ -147,7 +148,7 @@ __bootstrap UNZIP unzip __unzip
 # HELPERS
 #----------------------------------------
 function _RUN_SCRIPT () {
-    script="$1"; shift
+    local script="$1"; shift
 
     if [ -e "${script}" ]
     then
@@ -176,24 +177,24 @@ function file_owner () {
 
 # script_pre = $(get_pre script.sh modulename)
 function get_pre () {
-    scriptname="$1"
-    modulename="$2"
+    local scriptname="$1"
+    local modulename="$2"
 
     echo "${LIBEXEC}/modules/${modulename}/$(basename "${scriptname}" .sh).pre.sh"
 }
 
 # script_post = $(get_post script.sh modulename)
 function get_post () {
-    scriptname="$1"
-    modulename="$2"
+    local scriptname="$1"
+    local modulename="$2"
 
     echo "${LIBEXEC}/modules/${modulename}/$(basename "${scriptname}" .sh).post.sh"
 }
 
 # script_middle = $(get_mid script.sh modulename)
 function get_mid () {
-    scriptname="$1"
-    modulename="$2"
+    local scriptname="$1"
+    local modulename="$2"
 
     echo "${LIBEXEC}/modules/${modulename}/$(basename "${scriptname}" .sh).mid.sh"
 }
@@ -206,12 +207,12 @@ function get_mid () {
 # module_specs=$(get_module_specs module_name)
 #
 function get_module_specs () {
-    module_name="$1"
-    specs="${INITIAL_RELEASE["${module_name}"]}"
+    local module_name="$1"
+    local specs="${INITIAL_RELEASE["${module_name}"]}"
     set $specs
     [ $# -ne 3 ] && die "Invalid module spec:[$specs]"
-    repos_name="$1"
-    branch_name="$2"
+    local repos_name="$1"
+    local branch_name="$2"
     eval "install_dir=$3"   # for possible ~ expansion
     echo "$repos_name" "$branch_name" "$install_dir"
 }
@@ -227,7 +228,7 @@ function get_topmodule () {
 # submodules_list=$(get_submodules_list module_name)
 #
 function get_submodules_list () {
-    module_name="$1"
+    local module_name="$1"
     echo "${MODULES["${module_name}"]}"
 }
 
@@ -246,19 +247,19 @@ function git_url () {
 #
 # install_git_distribution module
 function install_git_distribution () {
-    module_name="$1"
+    local module_name="$1"
 
     [ -z "${module_name}" ] && die "[install_git_distribution] Usage: install_git_distribution <module_name>"
 
     set ${INITIAL_RELEASE["${module_name}"]}
     [ $# -ne 3 ] && die "[install_git_distribution] Invalid git module specification:[${INITIAL_RELEASE["${module_name}"]}]"
 
-    repos_name="$1"
-    branch_name="$2"
+    local repos_name="$1"
+    local branch_name="$2"
     eval "install_dir=$3"   # for possible ~ expansion
 
-    zipdirname="${repos_name}-${branch_name}"
-    zipfile="${repos_name}-${branch_name}.zip"
+    local zipdirname="${repos_name}-${branch_name}"
+    local zipfile="${repos_name}-${branch_name}.zip"
 
     # 2. Fetch the stuff
     $CURL -s -f -C - --retry 9 --retry-delay 5 -o "${zipfile}"  "https://codeload.github.com/franckporcher/${repos_name}/zip/${branch_name}"

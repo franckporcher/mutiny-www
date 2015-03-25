@@ -49,18 +49,18 @@ function _install_module () {
     # Install module
     #--------------------
     # Get specs
-    module_specs="$(get_module_specs "${module_name}")"
+    local module_specs="$(get_module_specs "${module_name}")"
     set ${module_specs}
-    git_repos_name="$1"
-    git_branch_name="$2"
-    install_dir="$3"
+    local git_repos_name="$1"
+    local git_branch_name="$2"
+    local install_dir="$3"
 
     # Check install_dir 
     if [ -d "${install_dir}" ]
     then
-        nodir_flag=
+        local nodir_flag=
     else
-        nodir_flag=1
+        local nodir_flag=1
     fi
 
     # Retrieve and install remote branch into "install_dir"
@@ -78,7 +78,7 @@ function _install_module () {
         ls -A "${install_dir}" > "${install_dir}/.gitignore"
 
         # Clone git repository into a new temporary sub directory
-        tmpdir="__git_tmp_$(date "+%s")"
+        local tmpdir="__git_tmp_$(date "+%s")"
         $DO $GIT clone --branch "${git_branch_name}" "$( git_url "${git_repos_name}" )" "${tmpdir}" \
             || die "[bootstrap_module] Cannot git clone ${git_repos_name}/${git_branch_name} into ${tmpdir} ($!)"
         $DO chown -R "${WWWUID}:${WWWGID}" "${tmpdir}"
@@ -96,7 +96,7 @@ function _install_module () {
 # Recurs over module's submodules
 # 
 function _install_submodules () {
-    module_name="$1"; shift
+    local module_name="$1"; shift
     [ -z "${module_name}" ] && die "Usage: _install_submodules module_name"
 
     #--------------------
@@ -107,7 +107,7 @@ function _install_submodules () {
     #--------------------
     # Submodules Install
     #--------------------
-    submodules_list="$(get_submodules_list "${module_name}")"
+    local submodules_list="$(get_submodules_list "${module_name}")"
     for submodule in ${submodules_list}
     do
         # recurse
@@ -134,13 +134,13 @@ function _install_submodules () {
 #----------------------------------------
 # To be called with -bootstrap for initial install from a boostrap stub
 function main() {
-    module_name="$1"
+    local module_name="$1"
     [ -z "${module_name}" ] && die "[main] Usage: $SCRIPTNAME module_name"
 
     if [ "${module_name}" == '-bootstrap' ] 
     then
         # 2nd stage boostrap only
-        top_module_name="$(get_topmodule)"
+        local top_module_name="$(get_topmodule)"
         ${DO} _install_submodules "${top_module_name}"
     else
         # Full 5 stages install
