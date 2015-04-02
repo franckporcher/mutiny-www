@@ -12,7 +12,7 @@
 #------------------------------------
 # APPLICATION 
 #------------------------------------
-WWW_INSTALLDIR=/Users/fpo/mutiny/local
+WWW_INSTALLDIR=/tmp/mutiny
 
 #------------------------------------
 # Web Server

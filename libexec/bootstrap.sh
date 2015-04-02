@@ -80,15 +80,15 @@ function main() {
     # Stage 1 Bootstrap : Install le chapeau
     local git_repos_name=mutiny-www
     local git_branch_name=stable-v1.0 
-    local fresh_install_dir=~/gitdeploy
+    local fresh_install_dir=/tmp/mutiny
 
 
-    $DO $GIT clone --branch "${git_branch_name}" "ssh://git@github.com/franckporcher/${git_repos_name}.git" "$fresh_install_dir" || die "bootstrap_module died: $!"
+    $DO $GIT clone --branch "${git_branch_name}" "https//git@github.com/franckporcher/${git_repos_name}.git" "$fresh_install_dir" || die "bootstrap_module died: $!"
     
     ##
     # STAGE 2 Bootstrap : Install hooks and submodules using the installed libexec
-    $DO cd "$fresh_install_dir"
-    $DO ./libexec/install_module.sh -bootstrap || die "[main] $(pwd)/libexec/boostrap.post.sh died: $!"
+    $DO cd "$fresh_install_dir/libexec"
+    $DO ./install_module.sh -bootstrap || die "[main] $(pwd)/boostrap.post.sh died: $!"
 }
 
 ${DO} main "$@"
