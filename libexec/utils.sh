@@ -248,7 +248,7 @@ function get_module_specs () {
     local module_name="$1"
     local specs="${INITIAL_RELEASE["${module_name}"]}"
     set $specs
-    [ $# -ne 3 ] && die "Invalid module spec:[$specs]"
+    [ $# -lt 3 ] && die "Invalid module spec:[$specs]"
     local repos_name="$1"
     local branch_name="$2"
     eval "module_dir=$3"       # for possible ~ expansion
@@ -501,5 +501,3 @@ function sed_expand_file () {
     echo "${file_E}"
 }
 
-
-#env

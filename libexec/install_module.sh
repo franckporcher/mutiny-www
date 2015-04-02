@@ -56,8 +56,7 @@ function _install_module () {
     # Pre-install module
     # in its own directory
     #--------------------
-    $DO $GIT clone --branch "${git_branch_name}" "$( git_url
-    "${git_repos_name}" )" "${module_dir}"   \
+    $DO $GIT clone --branch "${git_branch_name}" "$( git_url "${git_repos_name}" )" "${module_dir}"   \
     || die "[bootstrap_module] Cannot git clone:[${git_repos_name}/${git_branch_name}] into:["${module_dir}"] ($!)"
 
     # Transfer ownership to WWW
