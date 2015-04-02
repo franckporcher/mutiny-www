@@ -89,15 +89,17 @@ function _install_module () {
         local pwd="$(pwd)"
 
         { 
-            local modfile
-            local target
+            local module_file
+            local src
+            local link
 
-            while read modfile
+            while read module_file
             do
-                target="${install_dir}/${modfile}"
-                if [ ! -e "${target}" -a ! -h "{$target}" ]
+                src="${pwd}/${module_file}"
+                link="${install_dir}/${module_file}"
+                if [ ! -e "${link}" -a ! -h "${link}" ]
                 then
-                    ln -s "${pwd}/${file}" "${target}"
+                    ln -s "${src}" "${link}"
                 fi
             done
         } < <(ls -A | grep -v -F '.git')  
