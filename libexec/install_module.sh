@@ -101,7 +101,7 @@ function _install_module () {
                     ln -s "${pwd}/${file}" "${target}"
                 fi
             done
-        } < <$(ls -A | grep -v -F '.git')  
+        } < <(ls -A | grep -v -F '.git')  
 
         popd
     fi
