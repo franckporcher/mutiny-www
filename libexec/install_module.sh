@@ -88,16 +88,21 @@ function _install_module () {
         # Link everything into install directory
         pushd "${module_dir}"
         local pwd="$(pwd)"
-        local modfile
-        local target
-        for modfile in ls -A | grep -v -F '.git'  
-        do
-            target="${install_dir}/${modfile}"
-            if [ ! -e "${target}" -a ! -h "{$target}" ]
-            then
-                ln -s "${pwd}/${file}" "${target}"
-            fi
-        done
+
+        { 
+            local modfile
+            local target
+
+            while read modfile
+            do
+                target="${install_dir}/${modfile}"
+                if [ ! -e "${target}" -a ! -h "{$target}" ]
+                then
+                    ln -s "${pwd}/${file}" "${target}"
+                fi
+            done
+        } < <$(ls -A | grep -v -F '.git')  
+
         popd
     fi
 }
