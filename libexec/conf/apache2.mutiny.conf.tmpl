@@ -1,0 +1,133 @@
+NameVirtualHost *:80
+NameVirtualHost *:443
+
+<VirtualHost *:80>
+    ##
+    ## Server ID
+    ##
+    ServerName              ${VHOST_SERVER_NAME}
+    ServerAlias             ${VHOST_SERVER_ALIAS}
+    UseCanonicalName        On
+    ServerAdmin             ${VHOST_SERVER_ADMIN}
+
+    ##
+    ## PUBLIC content served by this server
+    ##
+    DocumentRoot        	"${VHOST_DOCUMENT_ROOT}"
+
+    <IfModule dir_module>
+        DirectoryIndex  index.php
+    </IfModule>
+    
+    <Directory "${VHOST_DOCUMENT_ROOT}">
+    	Options FollowSymLinks
+        AllowOverride All
+        Order allow,deny
+        Allow from all
+    </Directory>
+    
+    ##
+    ## PRIVATE content served thru SSL - for administration
+    ##
+    <Directory "${VHOST_DOCUMENT_ROOT}/store/admin3fep">
+        SSLRequireSSL
+        #SSLOptions      +StdEnvVars -StrictRequire
+        #SSLVerifyClient optional
+        #SSLVerifyDepth  1
+    </Directory>
+    
+    <Directory "${VHOST_DOCUMENT_ROOT}/wp-admin">
+        SSLRequireSSL
+        #SSLOptions      +StdEnvVars -StrictRequire
+        #SSLVerifyClient optional
+        #SSLVerifyDepth  1
+    </Directory>
+	
+    <Directory ~ "\.svn">
+    	Order allow,deny
+    	Deny from all
+  	</Directory>
+  	
+    <Directory ~ "\.git">
+    	Order allow,deny
+    	Deny from all
+  	</Directory>
+    
+    ##
+    ## Logging
+    ##
+    LogLevel info
+    ErrorLog   "${VHOST_ERRORLOG}"
+    CustomLog  "${VHOST_CUSTOMLOG_1}" "${VHOST_CUSTOMLOG_MODE_1}"
+    CustomLog  "${VHOST_CUSTOMLOG_2}" "${VHOST_CUSTOMLOG_MODE_2}"
+    
+    FileETag none
+    
+    RewriteEngine On
+   
+    #IncludeOptional ${VHOST_INCLUDE_OPTIONAL_1}
+    #IncludeOptional ${VHOST_INCLUDE_OPTIONAL_2}
+    
+    SetEnv "DBSERVER" "${DBSERVER}"
+    SetEnv "DBPORT"   "${DBPORT}"
+</VirtualHost>
+
+###
+### Secure site for administration
+###
+<VirtualHost _default_:443>
+    ServerName              ${VHOST_SERVER_NAME}
+    ServerAlias             ${VHOST_SERVER_ALIAS}
+    UseCanonicalName        On
+    ServerAdmin             ${VHOST_SERVER_ADMIN}
+    
+    SSLEngine               On
+    SSLProxyEngine          On
+    SSLCertificateFile      "${WWW_CONF}/ssl/mutinytahiti.com.crt"
+    SSLCertificateKeyFile   "${WWW_CONF}/ssl/mutinytahiti.com.key"
+  	SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
+    
+    ##
+    ## Content served by this server
+    ##
+    DocumentRoot        "${VHOST_DOCUMENT_ROOT}"
+    
+    <IfModule dir_module>
+        DirectoryIndex  index.php
+    </IfModule>
+    
+    <Directory "${VHOST_DOCUMENT_ROOT}">
+    	Options FollowSymLinks
+    	AllowOverride All
+        Order allow,deny
+        Allow from all
+    </Directory>
+  	
+    <Directory ~ "\.svn">
+    	Order allow,deny
+    	Deny from all
+  	</Directory>
+  	
+    <Directory ~ "\.git">
+    	Order allow,deny
+    	Deny from all
+  	</Directory>
+    
+    ##
+    ## Logging
+    ##
+    LogLevel info
+    ErrorLog   "${VHOST_ERRORLOG}"
+    CustomLog  "${VHOST_CUSTOMLOG_1}" "${VHOST_CUSTOMLOG_MODE_1}"
+    CustomLog  "${VHOST_CUSTOMLOG_2}" "${VHOST_CUSTOMLOG_MODE_2}"
+    
+    FileETag none
+    
+    RewriteEngine On
+    
+    #IncludeOptional ${VHOST_INCLUDE_OPTIONAL_1}
+    #IncludeOptional ${VHOST_INCLUDE_OPTIONAL_2}
+    
+    SetEnv "DBSERVER" "${DBSERVER}"
+    SetEnv "DBPORT"   "${DBPORT}"
+</VirtualHost>

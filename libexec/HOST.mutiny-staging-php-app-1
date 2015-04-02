@@ -1,0 +1,61 @@
+# 
+# HOST.mutiny-staging-php-app-1 - Custom parameters
+#
+#
+# PROJECT: MUTINY Tahiti's websites
+#
+# Copyright (C) 1995-2015 - Franck Porcher, Ph.D 
+# www.franckys.com
+# Tous droits réservés
+# All rights reserved
+
+#------------------------------------
+# APPLICATION 
+#------------------------------------
+WWW_INSTALLDIR=/srv/www/mutiny/current
+
+#------------------------------------
+# Web Server
+#------------------------------------
+WWW_CONF=/etc/apache2
+APACHE_RUN_USER="$(getconf "${WWW_CONF}/envvars" 'APACHE_RUN_USER=(\w+)')"
+APACHE_RUN_GROUP="$(getconf "${WWW_CONF}/envvars" 'APACHE_RUN_GROUP=(\w+)')"
+APACHE_LOG_DIR="$(getconf "${WWW_CONF}/envvars" 'APACHE_LOG_DIR=(\w+)')"
+VHOST_SERVER_NAME='mutinytahiti.com'
+VHOST_SERVER_ALIAS="www.mutinytahiti.com mutiny-tahiti.com www.mutiny-tahiti.com"
+VHOST_SERVER_ADMIN='webmaster@mutinytahiti.com'
+VHOST_DOCUMENT_ROOT="${WWW_INSTALLDIR}"
+VHOST_ERRORLOG="${APACHE_LOG_DIR}/mutinytahiti-com.error.log"
+VHOST_CUSTOMLOG_1="${APACHE_LOG_DIR}/mutinytahiti.com.access.log"
+VHOST_CUSTOMLOG_MODE_1=combined
+VHOST_CUSTOMLOG_2="${APACHE_LOG_DIR}/mutinytahiti.com.ganglia.log"
+VHOST_CUSTOMLOG_MODE_2=ganglia
+VHOST_INCLUDE_OPTIONAL_1="${WWW_CONF}/sites-available/mutiny.conf.d/rewrite*"
+VHOST_INCLUDE_OPTIONAL_2="${WWW_CONF}/sites-available/mutiny.conf.d/local*"
+
+#------------------------------------
+# DATA STORE 
+#------------------------------------
+DEFAULT_DB_SERVER='mutiny-staging-rds.cfwvxsax91fg.us-east-1.rds.amazonaws.com'
+eval "DBSERVER=$(grep -m 1 -E 'SetEnv.+DBSERVER' "${WWW_CONF}/sites-enabled/mutiny.conf" | awk '{print $3}')"
+[ -z "${DBSERVER}" ] && DBSERVER="${DEFAULT_DB_SERVER}"
+
+DEFAULT_DB_PORT=3306
+eval "DBPORT=$(grep -m 1 -E 'SetEnv.+DBPORT' "${WWW_CONF}/sites-enabled/mutiny.conf" | awk '{print $3}')"
+[ -z "${DBPORT}" ] && DBPORT="${DEFAULT_DB_PORT}"
+
+#------------------------------------
+# INSTALL FILES
+#------------------------------------
+unset CONF_FILES
+declare -A CONF_FILES
+CONF_FILES[apache2.conf]="append ${WWW_CONF}/apache2.conf"
+CONF_FILES[apache2.envvars]="append ${WWW_CONF}/envvars"
+CONF_FILES[apache2.charset.conf]="append ${WWW_CONF}/conf-available/charset.conf"
+
+#------------------------------------
+# INSTALL TEMPLATE FILES
+#------------------------------------
+unset INSTALL_TEMPLATES
+declare -A INSTALL_TEMPLATES
+TEMPLATE_FILES[apache2.mutiny.conf.tmpl]="install ${WWW_CONF}/sites-available/mutiny.conf"

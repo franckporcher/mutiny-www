@@ -1,0 +1,4 @@
+s/###SQL_WPDB###/${SQL_WPDB}/g
+s/###SQL_DBADMIN###/${SQL_DBADMIN}/g
+s/###SQL_DBADMIN_PWD###/${SQL_DBADMIN_PWD}/g
+s/###SQL_DBSERVER###/${SQL_DBSERVER}/g

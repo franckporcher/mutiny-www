@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# modules/mutiny/boostrap.post.sh module
+# modules/mutiny/install_module.post.sh module_name module_dir
 #
 # PROJECT: MUTINY Tahiti's websites
 #
@@ -23,11 +23,15 @@ source "$UTILS"
 function main() {
     # Install the submodules
     local module_name="$1"
+    local module_dir="$2"
 
     # INSTALL THE SQL STUFF
     $DO _RUN_SCRIPT "${LIBEXEC}/db.sh" -i                      || die "db.sh died ($!)" 
     $DO _RUN_SCRIPT "${LIBEXEC}/db.sh" -r ps psmutiny.init.sql || die "db.sh died ($!)" 
     $DO _RUN_SCRIPT "${LIBEXEC}/db.sh" -r wp wpmutiny.init.sql || die "db.sh died ($!)"
+
+    # RESTART APACHE
+    $APACHECTL graceful
 }
 
 ${DO} main "$@"

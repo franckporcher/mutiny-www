@@ -1,0 +1,4 @@
+s/###SQL_DBSERVER###/${SQL_DBSERVER}/g
+s/###SQL_PSDB###/${SQL_PSDB}/g
+s/###SQL_DBADMIN###/${SQL_DBADMIN}/g
+s/###SQL_DBADMIN_PWD###/${SQL_DBADMIN_PWD}/g

@@ -9,11 +9,40 @@
 # Tous droits réservés
 # All rights reserved
 
+#----------------------------------------
+# LEAVE IT HERE
+#----------------------------------------
+# Extract a piece of config from a file
+function getconf () {
+    local file="$1"
+    local regex="$2"
+
+    #echo "[GETCONF]  file:($file)"
+    #echo "          regex:($regex)"
+
+    if [ -e "${file}" ]
+    then
+        cat "${file}" | perl -ne "print \"\$1\" if m|${regex}|"
+    else
+        echo "file_not_found_${file}"
+    fi
+}
+
+#----------------------------------------
+# BOOTSTRAP CUSTOM DEFS FROM HOSTNAME
+#----------------------------------------
+HOSTNAME="$(hostname)"
+CUSTOMDEFS="HOST.${HOSTNAME}"
+[ ! -e "${CUSTOMDEFS}" ] && CUSTOMDEFS="HOST.default"
+export CUSTOMDEFS
+
+source "${CUSTOMDEFS}"
 
 #----------------------------------------
 # APPLICATION MODULES
 #----------------------------------------
 # Modules Arborescence
+unset MODULES
 declare -A MODULES
 MODULES[root]='mutiny'
 MODULES[mutiny]='wordpress store cgm'
@@ -21,40 +50,44 @@ MODULES[mutiny]='wordpress store cgm'
 #----------------------------------------
 # WEB SERVER CREDENTIALS
 #----------------------------------------
-WWWUID='www-data'
-WWWGID='www-data'
+WWWUID="${APACHE_RUN_USER}"
+WWWGID="${APACHE_RUN_GROUP}"
+export WWWUID WWWGID
 
 #----------------------------------------
-# GIT STUFF 
+# APP GIT MODULES 
 #----------------------------------------
 #GIT_URL="ssh://git@github.com/franckporcher"
 GIT_URL="https://git@github.com/franckporcher"
+export GIT_URL
 
 # Git Modules
+unset  INITIAL_RELEASE
+unset  CURRENT_RELEASE
 declare -A INITIAL_RELEASE
 declare -A CURRENT_RELEASE
 
-# moduleName > ReposName:BranchName:InstallDir
-# InstallDir shoudl be either an absolute path,
+#            [MODULE_NAME] = GIT-REPOS_NAME  BRANCH_NAME            MODULE_DIR                      INSTALL_DIRAUXDIR
+#
+# InstallDir should be either an absolute path,
 # or a relative path from <topinstalldir>/libexec
 # (from where all the scripts run)
-INITIAL_RELEASE[mutiny]="    mutiny-www      stable-v1.0            /srv/www/mutiny/current"
-INITIAL_RELEASE[wordpress]=" mutiny-www-wp   init-4.1.1-v1.0        /srv/www/mutiny/current"
-INITIAL_RELEASE[store]="     mutiny-www-ps   init-1.6.0.14-v1.0     /srv/www/mutiny/current/store"
-INITIAL_RELEASE[cgm]="       mutiny-www-cgm  stable-v1.0            /srv/www/mutiny/current/cgm"
+INITIAL_RELEASE[mutiny]="    mutiny-www      stable-v1.0            ${WWW_INSTALLDIR}"
+INITIAL_RELEASE[wordpress]=" mutiny-www-wp   init-4.1.1-v1.0        ${WWW_INSTALLDIR}/wordpress     ${WWW_INSTALLDIR}"
+INITIAL_RELEASE[store]="     mutiny-www-ps   init-1.6.0.14-v1.0     ${WWW_INSTALLDIR}/store"
+INITIAL_RELEASE[cgm]="       mutiny-www-cgm  stable-v1.0            ${WWW_INSTALLDIR}/cgm"
 
-CURRENT_RELEASE[mutiny]="    mutiny-www      stable-v1.0            /srv/www/mutiny/current"
-CURRENT_RELEASE[wordpress]=" mutiny-www-wp   init-4.1.1-v1.0        /srv/www/mutiny/current"
-CURRENT_RELEASE[store]="     mutiny-www-ps   init-1.6.0.14-v1.0     /srv/www/mutiny/current/store"
-CURRENT_RELEASE[cgm]="       mutiny-www-cgm  stable-v1.0            /srv/www/mutiny/current/cgm"
+CURRENT_RELEASE[mutiny]="    mutiny-www      stable-v1.0            ${WWW_INSTALLDIR}"
+CURRENT_RELEASE[wordpress]=" mutiny-www-wp   init-4.1.1-v1.0        ${WWW_INSTALLDIR}/wordpress     ${WWW_INSTALLDIR}"
+CURRENT_RELEASE[store]="     mutiny-www-ps   init-1.6.0.14-v1.0     ${WWW_INSTALLDIR}/store"
+CURRENT_RELEASE[cgm]="       mutiny-www-cgm  stable-v1.0            ${WWW_INSTALLDIR}/cgm"
 
 
 #----------------------------------------
 # MYSQL DB CREDENTIALS
 #----------------------------------------
 #SQL_DBSERVER=devsql.mutinytahiti.com
-eval "SQL_DBSERVER=$(grep -m 1 -E 'SetEnv.+DBSERVER' /etc/apache2/sites-enabled/mutiny.conf | awk '{print $3}')"
-[ -z "${SQL_DBSERVER}" ]  && SQL_DBSERVER="devsql.mutinytahiti.com"
+SQL_DBSERVER="${DBSERVER}"
 
 SQL_ROOT=root
 SQL_DBADMIN='mutiny_db_admin'
@@ -63,6 +96,8 @@ SQL_DBADMIN_PWD='AmantesIslaUnidos'
 SQL_PSDB=psmutiny
 SQL_WPDB=wpmutiny
 
+export SQL_DBSERVER SQL_ROOT SQL_DBADMIN SQL_DBADMIN_PWD SQL_PSDB SQL_WPDB
+
 
 #----------------------------------------
 # INSTALLATION HELPERS
@@ -70,4 +105,6 @@ SQL_WPDB=wpmutiny
 BOOTSTRAP_MODULE='bootstrap.sh'
 INSTALL_MODULE='install_module.sh'
 UPDATE_MODULE='update_module.sh'
+
+export BOOTSTRAP_MODULE INSTALL_MODULE UPDATE_MODULE
 

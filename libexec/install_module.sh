@@ -9,13 +9,10 @@
 # Tous droits réservés
 # All rights reserved
 
-# cd to the root repository
-#
-
 #----------------------------------------
 # BEGIN
 #----------------------------------------
-cd "$(dirname "$0")"
+cd "$(dirname "$0")"    # cd into libexeec
 SCRIPTNAME="$(basename "$0")"
 SCRIPTFQN="$(pwd)/$SCRIPTNAME"
 
@@ -41,52 +38,67 @@ function _install_module () {
     [ -z "${module_name}" ] && die "Usage: _install_module module_name"
 
     #--------------------
-    # PRE Install
+    # Module Specs
     #--------------------
-    $DO _RUN_SCRIPT "$(get_pre "${SCRIPTNAME}" "${module_name}")" "${module_name}"
-
-    #--------------------
-    # Install module
-    #--------------------
-    # Get specs
     local module_specs="$(get_module_specs "${module_name}")"
     set ${module_specs}
     local git_repos_name="$1"
     local git_branch_name="$2"
-    local install_dir="$3"
+    local module_dir="$3"
+    local install_dir="$4"
 
-    # Check install_dir 
-    if [ -d "${install_dir}" ]
+    #--------------------
+    # PRE Install
+    #--------------------
+    $DO _RUN_SCRIPT "$(get_pre "${SCRIPTNAME}" "${module_name}")" "${module_name}" "${module_dir}"
+
+    #--------------------
+    # Pre-install module
+    # in its own directory
+    #--------------------
+    $DO $GIT clone --branch "${git_branch_name}" "$( git_url
+    "${git_repos_name}" )" "${module_dir}"   \
+    || die "[bootstrap_module] Cannot git clone:[${git_repos_name}/${git_branch_name}] into:["${module_dir}"] ($!)"
+
+    # Transfer ownership to WWW
+    $DO chown -R "${WWWUID}:${WWWGID}" "${module_dir}"
+
+    #--------------------
+    # Install to the definite
+    # install dir
+    #--------------------
+    if [ "${module_dir}" != "${install_dir}" ]
     then
-        local nodir_flag=
-    else
-        local nodir_flag=1
-    fi
-
-    # Retrieve and install remote branch into "install_dir"
-    if [ -n "${nodir_flag}" ]
-    then # Recipient directory does not not exists : good !
-        $DO $GIT clone --branch "${git_branch_name}" "$( git_url "${git_repos_name}" )" "${install_dir}"   \
-            || die "[bootstrap_module] Cannot git clone:[${git_repos_name}/${git_branch_name}] into:["${install_dir}"] ($!)"
-
-        # Transfer ownership to WWW
-        $DO chown -R "${WWWUID}:${WWWGID}" "${install_dir}"
-
-    else # Recipient directory "${install_dir}" exists and may not be empty : not so good...
-
+        #---- VERSION 1 -----
+        # Clone in a clean dir and move everything to the recipient dir
+        # Creates overlapping problem if the recipient dir is already a git
+        # repository. Not good
+        #--------------------
         # Create a .gitignore comprised of everything existing in that directory
-        ls -A "${install_dir}" > "${install_dir}/.gitignore"
-
-        # Clone git repository into a new temporary sub directory
-        local tmpdir="__git_tmp_$(date "+%s")"
-        $DO $GIT clone --branch "${git_branch_name}" "$( git_url "${git_repos_name}" )" "${tmpdir}" \
-            || die "[bootstrap_module] Cannot git clone ${git_repos_name}/${git_branch_name} into ${tmpdir} ($!)"
-        $DO chown -R "${WWWUID}:${WWWGID}" "${tmpdir}"
+        # ls -A "${install_dir}" > "${install_dir}/.gitignore"
 
         # Move everything into install directory
-        mv ${tmpdir}/*      "${install_dir}"
-        mv ${tmpdir}/.[!.]* "${install_dir}"
-        $DO rm -rf "${tmpdir}"
+        # mv ${module_dir}/*      "${install_dir}"
+        # mv ${module_dir}/.[!.]* "${install_dir}"
+
+        #---- VERSION 2 -----
+        # Clone in a clean dir and links everything but git stuff into the recipient dir
+        # Better
+        #--------------------
+        # Link everything into install directory
+        pushd "${module_dir}"
+        local pwd="$(pwd)"
+        local modfile
+        local target
+        for modfile in ls -A | grep -v -F '.git'  
+        do
+            target="${install_dir}/${modfile}"
+            if [ ! -e "${target}" -a ! -h "{$target}" ]
+            then
+                ln -s "${pwd}/${file}" "${target}"
+            fi
+        done
+        popd
     fi
 }
 
@@ -100,9 +112,14 @@ function _install_submodules () {
     [ -z "${module_name}" ] && die "Usage: _install_submodules module_name"
 
     #--------------------
+    # Module Specs
+    #--------------------
+    local module_dir="$(get_module_dir "${module_name}")"
+
+    #--------------------
     # MID Install
     #--------------------
-    $DO _RUN_SCRIPT "$(get_mid "${SCRIPTNAME}" "${module_name}")" "${module_name}"
+    $DO _RUN_SCRIPT "$(get_mid "${SCRIPTNAME}" "${module_name}")" "${module_name}" "${module_dir}"
 
     #--------------------
     # Submodules Install
@@ -117,7 +134,8 @@ function _install_submodules () {
     #--------------------
     # POST Install
     #--------------------
-    $DO _RUN_SCRIPT "$(get_post "${SCRIPTNAME}" "${module_name}")" "${module_name}"
+    install_config_files "${module_name}"
+    $DO _RUN_SCRIPT "$(get_post "${SCRIPTNAME}" "${module_name}")" "${module_name}" "${module_dir}"
 }
 
 #----------------------------------------
