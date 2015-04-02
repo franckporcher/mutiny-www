@@ -25,7 +25,7 @@ VHOST_SERVER_NAME='mutinytahiti.local'
 VHOST_SERVER_ALIAS="www.mutinytahiti.local mutiny-tahiti.local www.mutiny-tahiti.local"
 VHOST_SERVER_ADMIN='webmaster@mutinytahiti.local'
 VHOST_DOCUMENT_ROOT="${WWW_INSTALLDIR}"
-VHOST_ERRORLOG="${APACHE_LOG_DIR}/mutinytahiti-com.error.log"
+VHOST_ERRORLOG="${APACHE_LOG_DIR}/mutinytahiti.com.error.log"
 VHOST_CUSTOMLOG_1="${APACHE_LOG_DIR}/mutinytahiti.com.access.log"
 VHOST_CUSTOMLOG_MODE_1=combinedio
 VHOST_CUSTOMLOG_2="${APACHE_LOG_DIR}/mutinytahiti.com.access.log"
@@ -62,12 +62,12 @@ declare -A CONFIG
 ## TEST ##
 CONFIG[mutiny]="mutiny-apache2-conf mutiny-apache2-envvars mutiny-apache2-charset mutiny-apache2-mutiny-conf"
 CONFIG[store]="store-presta-settings"
-CONFIG[wordpress]="wordpress-settings"
+CONFIG[wordpress]="wordpress-config"
 
        CONFIG[mutiny-apache2-conf]="append       apache2.conf                   ${WWW_INSTALLDIR}/httpd.conf"
     CONFIG[mutiny-apache2-envvars]="append       apache2.envvars                ${WWW_INSTALLDIR}/envvars"
     CONFIG[mutiny-apache2-charset]="append       apache2.charset.conf           ${WWW_INSTALLDIR}/httpd.conf"
 CONFIG[mutiny-apache2-mutiny-conf]="tmpl.install apache2.mutiny.conf.tmpl       ${WWW_INSTALLDIR}/httpd-vhosts.conf"
      CONFIG[store-presta-settings]="sed.install  prestashop.settings.php.tmpl   ${WWW_INSTALLDIR}/settings.inc.php"
-        CONFIG[wordpress-settings]="sed.install  wordpress.settings.php.tmpl    ${WWW_INSTALLDIR}/wp-config.php"
+          CONFIG[wordpress-config]="sed.install  wordpress.config.php.tmpl      ${WWW_INSTALLDIR}/wp-config.php"
 

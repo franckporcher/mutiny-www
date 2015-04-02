@@ -25,7 +25,7 @@ VHOST_SERVER_NAME='mutinytahiti.com'
 VHOST_SERVER_ALIAS="www.mutinytahiti.com mutiny-tahiti.com www.mutiny-tahiti.com"
 VHOST_SERVER_ADMIN='webmaster@mutinytahiti.com'
 VHOST_DOCUMENT_ROOT="${WWW_INSTALLDIR}"
-VHOST_ERRORLOG="${APACHE_LOG_DIR}/mutinytahiti-com.error.log"
+VHOST_ERRORLOG="${APACHE_LOG_DIR}/mutinytahiti.com.error.log"
 VHOST_CUSTOMLOG_1="${APACHE_LOG_DIR}/mutinytahiti.com.access.log"
 VHOST_CUSTOMLOG_MODE_1=combined
 VHOST_CUSTOMLOG_2="${APACHE_LOG_DIR}/mutinytahiti.com.ganglia.log"
@@ -45,17 +45,24 @@ eval "DBPORT=$(grep -m 1 -E 'SetEnv.+DBPORT' "${WWW_CONF}/sites-enabled/mutiny.c
 [ -z "${DBPORT}" ] && DBPORT="${DEFAULT_DB_PORT}"
 
 #------------------------------------
-# INSTALL FILES
+# CONFIG FILES
 #------------------------------------
-unset CONF_FILES
-declare -A CONF_FILES
-CONF_FILES[apache2.conf]="append ${WWW_CONF}/apache2.conf"
-CONF_FILES[apache2.envvars]="append ${WWW_CONF}/envvars"
-CONF_FILES[apache2.charset.conf]="append ${WWW_CONF}/conf-available/charset.conf"
+unset CONFIG
+declare -A CONFIG
 
-#------------------------------------
-# INSTALL TEMPLATE FILES
-#------------------------------------
-unset INSTALL_TEMPLATES
-declare -A INSTALL_TEMPLATES
-TEMPLATE_FILES[apache2.mutiny.conf.tmpl]="install ${WWW_CONF}/sites-available/mutiny.conf"
+# CONFIG[ module-name         ]    => "module-conffile-tag... "
+# CONFIG[ module-conffile-tag ]    => "<OP> TEMPLATE_FILE INSTALLDIR"
+#
+#   OP={install,append,tmpl.install,sed.install,tmpl.append,sed.append}
+
+## OPERATIONAL ##
+CONFIG[mutiny]="mutiny-apache2-conf mutiny-apache2-envvars mutiny-apache2-charset mutiny-apache2-mutiny-conf"
+CONFIG[store]="store-presta-settings"
+CONFIG[wordpress]="wordpress-config"
+
+       CONFIG[mutiny-apache2-conf]="append       apache2.conf                  ${WWW_CONF}/apache2.conf"
+    CONFIG[mutiny-apache2-envvars]="append       apache2.envvars               ${WWW_CONF}/envvars"
+    CONFIG[mutiny-apache2-charset]="append       apache2.charset.conf          ${WWW_CONF}/conf-available/charset.conf"
+CONFIG[mutiny-apache2-mutiny-conf]="tmpl.install apache2.mutiny.conf.tmpl      ${WWW_CONF}/sites-available/mutiny.conf"
+     CONFIG[store-presta-settings]="sed.install  prestashop.settings.php.tmpl  ${WWW_INSTALLDIR}/store/config/settings.inc.php"
+          CONFIG[wordpress-config]="sed.install  wordpress.config.php.tmpl     ${WWW_INSTALLDIR}/wordpress/wp-config.php"
