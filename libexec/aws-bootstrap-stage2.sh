@@ -76,7 +76,7 @@ __bootstrap GIT git __git
 # main
 #----------------------------------------
 function main() {
-    $DO ./install_module.sh -bootstrap || die "[main] $(SCRIPTFQN) died: $!"
+    $DO ./install_module.sh -bootstrap || die "[main] ${SCRIPTFQN} died: $!"
 }
 
 ${DO} main "$@"

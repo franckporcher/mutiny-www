@@ -18,11 +18,11 @@ WWW_INSTALLDIR=/srv/www/mutiny/current
 # Web Server
 #------------------------------------
 WWW_CONF=/etc/apache2
-APACHE_RUN_USER="$(getconf "${WWW_CONF}/envvars" 'APACHE_RUN_USER=(\w+)')"
-APACHE_RUN_GROUP="$(getconf "${WWW_CONF}/envvars" 'APACHE_RUN_GROUP=(\w+)')"
-APACHE_LOG_DIR="$(getconf "${WWW_CONF}/envvars" 'APACHE_LOG_DIR=(\w+)')"
+APACHE_RUN_USER="$(getconf "${WWW_CONF}/envvars" 'APACHE_RUN_USER=([\w_-]+)')"
+APACHE_RUN_GROUP="$(getconf "${WWW_CONF}/envvars" 'APACHE_RUN_GROUP=([\w_-]+)')"
+APACHE_LOG_DIR="$(getconf "${WWW_CONF}/envvars" 'APACHE_LOG_DIR=([\w_-]+)')"
 VHOST_SERVER_NAME='mutinytahiti.com'
-VHOST_SERVER_ALIAS="www.mutinytahiti.com mutiny-tahiti.com www.mutiny-tahiti.com"
+VHOST_SERVER_ALIAS="dev.mutinytahiti.com"
 VHOST_SERVER_ADMIN='webmaster@mutinytahiti.com'
 VHOST_DOCUMENT_ROOT="${WWW_INSTALLDIR}"
 VHOST_ERRORLOG="${APACHE_LOG_DIR}/mutinytahiti.com.error.log"

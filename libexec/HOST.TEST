@@ -18,8 +18,8 @@ WWW_INSTALLDIR=/Users/fpo/mutiny/buildtest
 # Web Server
 #------------------------------------
 WWW_CONF=/etc/apache2
- APACHE_RUN_USER="$(getconf  "${WWW_CONF}/httpd.conf"  '^User[[:space:]]+(\w+)')"
-APACHE_RUN_GROUP="$(getconf  "${WWW_CONF}/httpd.conf"  '^Group[[:space:]]+(\w+)')"
+ APACHE_RUN_USER="$(getconf  "${WWW_CONF}/httpd.conf"  '^User[[:space:]]+([\w_-]+)')"
+APACHE_RUN_GROUP="$(getconf  "${WWW_CONF}/httpd.conf"  '^Group[[:space:]]+([\w_-]+)')"
   APACHE_LOG_DIR="$(getconf  "${WWW_CONF}/httpd.conf"  '^ErrorLog[[:space:]]+['\''"]?(.*?)/[^/'\''"]+['\''"]?[[:space:]]*$')"
 VHOST_SERVER_NAME='mutinytahiti.local'
 VHOST_SERVER_ALIAS="www.mutinytahiti.local mutiny-tahiti.local www.mutiny-tahiti.local"

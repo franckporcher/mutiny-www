@@ -88,7 +88,7 @@ function main() {
     ##
     # STAGE 2 Bootstrap : Install hooks and submodules using the installed libexec
     $DO cd "$fresh_install_dir/libexec"
-    $DO ./install_module.sh -bootstrap || die "[main] $(pwd)/boostrap.post.sh died: $!"
+    $DO ./install_module.sh -bootstrap || die "[main] $(pwd)/boostrap.sh died: $!"
 }
 
 ${DO} main "$@"
