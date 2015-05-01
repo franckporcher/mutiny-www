@@ -80,7 +80,7 @@ function main() {
     # Stage 1 Bootstrap : Install le chapeau
     local git_repos_name=mutiny-www
     local git_branch_name=stable-v1.0 
-    local fresh_install_dir=~/root/mutiny
+    local fresh_install_dir=~root/mutiny
 
     if [ ! -d "${fresh_install_dir}" ]
     then
