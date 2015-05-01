@@ -448,21 +448,29 @@ function main() {
 
     for cmd in "${cmds[@]}"
     do
-        stage_mark="${module_dir}/.${module_name}.${cmd}"
+        local previous_cmd="${PREVIOUS_STAGE["$cmd"]}"
 
-        if [ -e "${stage_mark}" ]
+        if [ -n "$previous_cmd" ] && [ ! -e "${module_dir}/.${module_name}.${previous_cmd}" ]
         then
-            logtrace "[main] Module:[$module_name] - Stage:[$cmd] already completed !"
-        else
-            local previous_cmd="${PREVIOUS_STAGE["$cmd"]}"
+            logtrace "[main] Module:[$module_name] - Previous stage:[$previous_cmd] must be completed first !"
+            return 1
 
-            if [ -n "$previous_cmd" ] && [ ! -e "${module_dir}/.${module_name}.${previous_cmd}" ]
+        # Preinstall stage : module_dir normally does not exist
+        elif [ "${cmd}" == 'preinstall' ]
+        then
+            ${DO} "_install_module_${cmd}"  "${module_name}"
+
+        # Other stages : module_dir normally exists
+        else
+            stage_mark="${module_dir}/.${module_name}.${cmd}"
+
+            if [ -e "${stage_mark}" ]
             then
-                logtrace "[main] Module:[$module_name] - Previous stage:[$previous_cmd] must be completed first !"
-                return 1
+                logtrace "[main] Module:[$module_name] - Stage:[$cmd] already completed !"
+
             elif ${DO} "_install_module_${cmd}"  "${module_name}"
             then
-                touch "${stage_mark}"
+                touch "${stage_mark}" 
             fi
         fi
     done
