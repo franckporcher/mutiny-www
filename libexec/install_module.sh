@@ -456,7 +456,7 @@ function main() {
         else
             local previous_cmd="${PREVIOUS_STAGE["$cmd"]}"
 
-            if [ -n "$previous_cmd" && ! -e "${module_dir}/.${module_name}.${previous_cmd}" ]
+            if [ -n "$previous_cmd" ] && [ ! -e "${module_dir}/.${module_name}.${previous_cmd}" ]
             then
                 logtrace "[main] Module:[$module_name] - Previous stage:[$previous_cmd] must be completed first !"
                 return 1
