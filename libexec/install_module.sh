@@ -315,12 +315,19 @@ function main() {
                 ;;
             -a | -all | --all   ) cmds=( "${OPTIONS[@]}" )
                 ;;
-            -no*  | --no*       ) opt=${opt##-}
-                                  opt=${opt#no}
+                    --no*       ) opt=${opt#'--no'}
                                   # remove command
                                   cmds[ ${OPTIONS_CODE["$opt"]} ]=''
                                   ;;
-            -*    | --*         ) opt=${opt##-}
+            -no*                ) opt=${opt#'-no'}
+                                  # remove command
+                                  cmds[ ${OPTIONS_CODE["$opt"]} ]=''
+                                  ;;
+                    --*         ) opt=${opt#'--'}
+                                  # Add command
+                                  cmds[ ${OPTIONS_CODE["$opt"]} ]="$opt"
+                                  ;;
+            -*                  ) opt=${opt#'-'}
                                   # Add command
                                   cmds[ ${OPTIONS_CODE["$opt"]} ]="$opt"
                                   ;;
