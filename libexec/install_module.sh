@@ -310,7 +310,7 @@ OPTIONS_CODE[postinstall]=6
 
 declare -A PREVIOUS_STAGE
 PREVIOUS_STAGE[preinstall]=''
-PREVIOUS_STAGE[fetch]='preinstall'
+PREVIOUS_STAGE[fetch]=''
 PREVIOUS_STAGE[install]='fetch'
 PREVIOUS_STAGE[midinstall]='install'
 PREVIOUS_STAGE[config]='midinstall'
@@ -456,7 +456,7 @@ function main() {
             return 1
 
         # Preinstall stage : module_dir normally does not exist
-        elif [ "${cmd}" == 'preinstall' ]
+        elif [ "${cmd}" == 'preinstall' ] && [ ! -d "${module_dir}" ]
         then
             ${DO} "_install_module_${cmd}"  "${module_name}"
 
