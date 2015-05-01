@@ -336,19 +336,15 @@ function main() {
 
 
     ##
-    # CHECK FOR BOOTSTRAP
+    # CHECK FOR NOMODULE
     #
     if [ "${module_name}" == '-bootstrap' ] 
     then
         module_name="$(get_topmodule)"
-        module_dir="$(get_module_dir "${module_name}")"
-
-        touch "${module_dir}/.${module_name}.preinstall"
-        touch "${module_dir}/.${module_name}.fetch"
-
-        # 2nd stage boostrap only
-        cmds[ ${OPTIONS_CODE["preinstall"]} ]=''
-        cmds[ ${OPTIONS_CODE["fetch"]} ]=''
+    elif [ -z "${IS_MODULE["${module_name}"]}" ]
+    then
+        logtrace "[main] Module:[$module_name] - Not a module"
+        return 1
     fi
 
 
@@ -371,6 +367,7 @@ function main() {
     ##
     # LIST STAGES ALREADY DONE
     #
+
     if [ -n "$listop" ]
     then
         stage_mark="${module_dir}/.${module_name}."

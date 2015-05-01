@@ -68,11 +68,27 @@ export WWWUID WWWGID WWWHOME
 # APPLICATION MODULES
 #----------------------------------------
 # Modules Arborescence
+unset IS_MODULE
+declare -A IS_MODULE
+IS_MODULE[root]=1
+IS_MODULE[mutiny]=1
+IS_MODULE[wordpress]=1
+IS_MODULE[store]=1
+IS_MODULE[cgm]=1
+IS_MODULE[perltrace]=1
+IS_MODULE[perlerror]=1
+IS_MODULE[perlmuffinmc]=1
+
 unset MODULES
 declare -A MODULES
 MODULES[root]='mutiny'
 MODULES[mutiny]='wordpress store cgm'
+MODULES[wordpress]=''
+MODULES[store]=''
 MODULES[cgm]='perltrace perlerror perlmuffinmc'
+MODULES[perltrace]=''
+MODULES[perlerror]=''
+MODULES[perlmuffinmc]=''
 
 unset PARENT_MODULE
 declare -A PARENT_MODULE
