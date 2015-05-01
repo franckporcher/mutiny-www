@@ -29,6 +29,22 @@ function getconf () {
 }
 
 #----------------------------------------
+# MYSQL DB CREDENTIALS 1/2
+#----------------------------------------
+SQL_ROOT='root'
+SQL_DBADMIN='mutiny_db_admin'
+SQL_DBADMIN_PWD='AmantesIslaUnidos'
+
+# Prestashop
+SQL_PSDB=psmutiny
+
+# Wordpress
+SQL_WPDB=wpmutiny
+
+export SQL_ROOT SQL_DBADMIN SQL_DBADMIN_PWD SQL_PSDB SQL_WPDB
+
+
+#----------------------------------------
 # BOOTSTRAP CUSTOM DEFS FROM HOSTNAME
 #----------------------------------------
 HOSTNAME="$(hostname)"
@@ -103,23 +119,14 @@ CURRENT_RELEASE[perltrace]="            perl5-Franckys-Trace    v0.11-stable    
 CURRENT_RELEASE[perlerror]="            perl5-Franckys-Error    v0.11-stable           ${WWW_INSTALLDIR}/cgm/modperl/FranckysError"
 CURRENT_RELEASE[perlmuffinmc]="         perl5-Franckys-MuffinMC v0.11-stable           ${WWW_INSTALLDIR}/cgm/modperl/FranckysMuffinMC"
 
+
 #----------------------------------------
-# MYSQL DB CREDENTIALS
+# MYSQL DB CREDENTIALS 2/2
 #----------------------------------------
 #SQL_DBSERVER=devsql.mutinytahiti.com
 SQL_DBSERVER="${DBSERVER}"
 
-SQL_ROOT=root
-SQL_DBADMIN='mutiny_db_admin'
-SQL_DBADMIN_PWD='AmantesIslaUnidos'
-
-# Prestashop
-SQL_PSDB=psmutiny
-
-# Wordpress
-SQL_WPDB=wpmutiny
-
-export SQL_DBSERVER SQL_ROOT SQL_DBADMIN SQL_DBADMIN_PWD SQL_PSDB SQL_WPDB
+export SQL_DBSERVER
 
 
 #----------------------------------------
