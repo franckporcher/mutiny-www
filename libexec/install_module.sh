@@ -340,10 +340,15 @@ function main() {
     #
     if [ "${module_name}" == '-bootstrap' ] 
     then
+        module_name="$(get_topmodule)"
+        module_dir="$(get_module_dir "${module_name}")"
+
+        touch "${module_dir}/.${module_name}.preinstall"
+        touch "${module_dir}/.${module_name}.fetch"
+
         # 2nd stage boostrap only
         cmds[ ${OPTIONS_CODE["preinstall"]} ]=''
         cmds[ ${OPTIONS_CODE["fetch"]} ]=''
-        module_name="$(get_topmodule)"
     fi
 
 
