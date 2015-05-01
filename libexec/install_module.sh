@@ -77,7 +77,7 @@ function _install_module_fetch () {
     #   OWN DIRECTORY
     #--------------------
     $DO $GIT clone --branch "${git_branch_name}" "$( git_url "${git_repos_name}" )" "${module_dir}"   \
-    || die "[install_module_fetch] Cannot git clone:[${git_repos_name}/${git_branch_name}] into:["${module_dir}"] ($!)"
+      || die "[install_module_fetch] Cannot git clone:[${git_repos_name}/${git_branch_name}] into:["${module_dir}"] ($!)"
 }
 
 
@@ -104,8 +104,9 @@ function _install_module_install () {
     # Install to the definite
     # install dir
     #--------------------
-    # Transfer ownership to WWW
-    $DO chown -R "${WWWUID}:${WWWGID}" "${module_dir}"
+
+    # Transfer ownership to WWW : CASE BY CASE IN MID/POST CUSTOM INSTALL
+    # $DO chown -R "${WWWUID}:${WWWGID}" "${module_dir}"
 
     if [ "${module_dir}" != "${install_dir}" ]
     then
@@ -280,13 +281,13 @@ function _install_module_postinstall () {
 OPTIONS=(preinstall fetch install midinstall config submodules postinstall)
 
 declare -A OPTIONS_CODE
-OPTIONS_CODE[preinstall]  = 0
-OPTIONS_CODE[fetch]       = 2
-OPTIONS_CODE[install]     = 3
-OPTIONS_CODE[midinstall]  = 4
-OPTIONS_CODE[config]      = 5
-OPTIONS_CODE[submodules]  = 6
-OPTIONS_CODE[postinstall] = 7
+OPTIONS_CODE[preinstall]=0
+OPTIONS_CODE[fetch]=1
+OPTIONS_CODE[install]=2
+OPTIONS_CODE[midinstall]=3
+OPTIONS_CODE[config]=4
+OPTIONS_CODE[submodules]=5
+OPTIONS_CODE[postinstall]=6
 
 function main() {
     local module_name="$1"
@@ -330,7 +331,6 @@ function main() {
     ##
     # CHECK FOR BOOTSTRAP
     #
-    if 
     if [ "${module_name}" == '-bootstrap' ] 
     then
         # 2nd stage boostrap only
@@ -354,6 +354,7 @@ function main() {
         ${DO} echo "[main] [DRYRUN] Module:[$module_name] - Would run the commands --> $listop ${cmds[*]}"
         return 0
     fi
+
 
     ##
     # LIST STAGES ALREADY DONE
