@@ -32,7 +32,9 @@ function die () {
 }
 
 function do_log () {
-    log "[TRACE::$SCRIPTFQN (~/$(pwd))] --> $*"
+    local msg="[$SCRIPTFQN (~/$(pwd))] --> $*"
+    echo "$msg" 1>&2
+    log "$msg"
     "$@"
 }
 
@@ -87,12 +89,12 @@ function main() {
         mkdir -p "${fresh_install_dir}"
     fi
 
-    $DO $GIT clone --branch "${git_branch_name}" "git://github.com/franckporcher/${git_repos_name}.git" "$fresh_install_dir" || die "bootstrap_module died: $!"
+    $DO $GIT clone --branch "${git_branch_name}" "git://github.com/franckporcher/${git_repos_name}.git" "$fresh_install_dir" || die "$SCRIPTFQN died: $!"
     
     ##
     # STAGE 2 Bootstrap : Install hooks and submodules using the installed libexec
     $DO cd "$fresh_install_dir/libexec"
-    # $DO ./install_module.sh -bootstrap || die "[main] $(pwd)/boostrap.sh died: $!"
+    $DO ./install_module.sh -bootstrap -all || die "[main] $SCRIPTFQN died: $!"
 }
 
 ${DO} main "$@"

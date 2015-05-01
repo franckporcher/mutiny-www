@@ -30,13 +30,24 @@ export PATH
 # DEBUG
 #----------------------------------------
 function log () {
-    logger -s -t "$SCRIPTNAME" "$*"
+    local msg="[$SCRIPTFQN (~$(pwd))] --> $*"
+    logger -s -t "$SCRIPTNAME" "$msg"
+}
+
+function trace () {
+    local msg="[$SCRIPTFQN (~$(pwd))] --> $*"
+    echo "$msg" 1>&2
+}
+
+function logtrace () {
+    log   "$*"
+    trace "$*"
 }
 
 function die () {
     local msg="[ERROR::$SCRIPTFQN (~$(pwd))] $*. Aborting!"
     echo "$msg" 1>&2
-    log "$msg"
+    logger -s -t "$SCRIPTNAME" "$msg"
     exit 1
 }
 
@@ -46,18 +57,18 @@ function do () {
 }
 
 function do_trace () {
-    log "[TRACE::$SCRIPTFQN (~/$(pwd))] --> $*"
+    trace "$*"
+	"$@"
+}
+
+function do_log () {
+    log "$*"
     "$@"
 }
 
-function trace () {
-    echo "$*" 1>&2
-}
-
-function logtrace () {
-    local msg="[$SCRIPTFQN (~$(pwd))] --> $*"
-    echo "$msg" 1>&2
-    log "$msg"
+function do_logtrace () {
+    logtrace "$*"
+    "$@"
 }
 
 function do_continue () {
@@ -81,10 +92,11 @@ function do_continue () {
 #   do_continue: reports step by step operation, with the option to exit the script at each step
 #   do         : reports step by step operation
 #DO=echo
-#DO=do_continue
-#DO=do_log
 #DO=do
-DO=do_trace
+#DO=do_continue
+#DO=do_trace
+#DO=do_log
+DO=do_logtrace
 
 
 #----------------------------------------

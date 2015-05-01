@@ -86,9 +86,9 @@ declare -A CONFIG
 #   OP={install,append,tmpl.install,sed.install,tmpl.append,sed.append}
 
 ## OPERATIONAL ##
-CONFIG[mutiny]='apache2-conf apache2-envvars apache2-charset apache2-vhost-conf psdb-init-sql-tmpl wpdb-init-sql-tmpl'
-CONFIG[store]='store-presta-settings'
-CONFIG[wordpress]='wordpress-config'
+CONFIG[mutiny]='apache2-conf apache2-envvars apache2-charset apache2-vhost-conf'
+CONFIG[store]='store-presta-settings psdb-init-sql-tmpl'
+CONFIG[wordpress]='wordpress-config wpdb-init-sql-tmpl'
 
          CONFIG[apache2-conf]="append       apache2.conf                  ${WWW_CONF}/httpd.conf                            644 root root"   
       CONFIG[apache2-envvars]="append       apache2.envvars               /usr/sbin/envvars                                 644 root root"

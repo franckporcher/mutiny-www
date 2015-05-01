@@ -32,7 +32,9 @@ function die () {
 }
 
 function do_log () {
-    log "[TRACE::$SCRIPTFQN (~/$(pwd))] --> $*"
+    local msg="[$SCRIPTFQN (~/$(pwd))] --> $*"
+    echo "$msg" 1>&2
+    log "$msg"
     "$@"
 }
 
@@ -76,7 +78,5 @@ __bootstrap GIT git __git
 # main
 #----------------------------------------
 function main() {
-    $DO ./install_module.sh -bootstrap || die "[main] ${SCRIPTFQN} died: $!"
+    $DO ./install_module.sh -bootstrap -all || die "[main] ${SCRIPTFQN} died: $!"
 }
-
-${DO} main "$@"
