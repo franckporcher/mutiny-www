@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-# db.sh -- Scripted management of MUTONY Tahiti's MySQL databases
+# db.sh -- Scripted management of MUTINY Tahiti's MySQL databases
 #
 # PROJECT: MUTINY Tahiti's websites
 #
-# Copyright (C) 1995-2015 - Franck Porcher, Ph.D 
+# Copyright (C) 2014-2015 - Franck Porcher, Ph.D 
 # www.franckys.com
 # Tous droits réservés
 # All rights reserved

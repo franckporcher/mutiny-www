@@ -6,7 +6,7 @@
 #
 # LIBEXEC must be defined or taken as . as default
 #
-# Copyright (C) 1995-2015 - Franck Porcher, Ph.D 
+# Copyright (C) 2014-2015 - Franck Porcher, Ph.D 
 # www.franckys.com
 # Tous droits réservés
 

@@ -4,7 +4,7 @@
 #
 # PROJECT: MUTINY Tahiti's websites
 #
-# Copyright (C) 1995-2015 - Franck Porcher, Ph.D 
+# Copyright (C) 2014-2015 - Franck Porcher, Ph.D 
 # www.franckys.com
 # Tous droits réservés
 # All rights reserved
@@ -404,4 +404,38 @@ function main() {
     done
 }
 
-${DO} main "$@"
+if [ $# -lt 1 ]
+then
+    cat <<-EOT
+
+    USAGE: $SCRIPTNAME {MODULE-NAME | -bootstrap} [OPTIONS]
+
+    OPTIONS:
+        -d              --dryrun        # Tell what will be done but do not run it
+        -l -list        --list          # List completed installations stages
+
+        -a -all         --all           # Run all installation stages
+        -none           --none          # Run none (default)
+
+        -preinstall     --preinstall    # Preinstall stage
+        -fetch          --fetch         # Fetch the module on GitHub
+        -install        --install       # Installs it to its final destination
+        -midinstall     --midinstall    # Custom mid-install stage
+        -config         --config        # Install/Tune configuration files
+        -submodules     --submodules    # Install submodules
+        -postinstall    --postinstall   # Post-install  stage
+
+        -nopreinstall   --nopreinstall
+        -nofetch        --nofetch
+        -noinstall      --noinstall
+        -nomidinstall   --nomidinstall
+        -noconfig       --noconfig
+        -nosubmodules   --nosubmodules
+        -nopostinstall  --nopostinstall
+EOT
+
+else
+    ${DO} main "$@"
+fi
+        
+
