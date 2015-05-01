@@ -49,7 +49,13 @@ function _install_module_preinstall () {
     #--------------------
     # PRE Install
     #--------------------
-    $DO _RUN_SCRIPT "$(get_pre "${SCRIPTNAME}" "${module_name}")" "${module_name}" "${module_dir}"
+    local preinstall="$(get_pre "${SCRIPTNAME}" "${module_name}")"
+    if [ -e "${preinstall}" ]
+    then
+        $DO _RUN_SCRIPT "${preinstall}" "${module_name}" "${module_dir}"
+    else
+        return 0
+    fi
 }
 
 
@@ -168,7 +174,13 @@ function _install_module_midinstall () {
     #--------------------
     # MID Install
     #--------------------
-    $DO _RUN_SCRIPT "$(get_mid "${SCRIPTNAME}" "${module_name}")" "${module_name}" "${module_dir}"
+    local midinstall="$(get_mid "${SCRIPTNAME}" "${module_name}")"
+    if [ -e "${midinstall}" ]
+    then
+        $DO _RUN_SCRIPT "${midinstall}" "${module_name}" "${module_dir}"
+    else
+        return 0
+    fi
 }
 
 
@@ -237,7 +249,13 @@ function _install_module_postinstall () {
     #--------------------
     # POST Install
     #--------------------
-    $DO _RUN_SCRIPT "$(get_post "${SCRIPTNAME}" "${module_name}")" "${module_name}" "${module_dir}"
+    local postinstall="$(get_post "${SCRIPTNAME}" "${module_name}")"
+    if [ -e "${postinstall}" ]
+    then
+        $DO _RUN_SCRIPT "${postinstall}" "${module_name}" "${module_dir}"
+    else
+        return 0
+    fi
 }
 
 
@@ -274,6 +292,7 @@ function _install_module_postinstall () {
 #
 #   -d              --dryrun
 #   -l -list        --list
+#   -m              --listsubmodules
 #
 #----------------------------------------
 # To be called with -bootstrap -all for initial install from a boostrap stub
@@ -289,6 +308,15 @@ OPTIONS_CODE[config]=4
 OPTIONS_CODE[submodules]=5
 OPTIONS_CODE[postinstall]=6
 
+declare -A PREVIOUS_STAGE
+PREVIOUS_STAGE[preinstall]=''
+PREVIOUS_STAGE[fetch]='preinstall'
+PREVIOUS_STAGE[install]='fetch'
+PREVIOUS_STAGE[midinstall]='install'
+PREVIOUS_STAGE[config]='midinstall'
+PREVIOUS_STAGE[submodules]='config'
+PREVIOUS_STAGE[postinstall]='submodules'
+
 function main() {
     local module_name="$1"
     shift
@@ -298,6 +326,7 @@ function main() {
     local module_dir
     local cmds=()
     local listop
+    local listsubmodules
     local dryop
     local opt
     local cmd
@@ -309,21 +338,30 @@ function main() {
         case "$opt" in 
             -d    | --dryrun    ) dryop=1
                 ;;
+
             -l | -list | --list ) listop=list
                 ;;
+            
+            -m |  --list-submodules ) listsubmodules=1
+                ;;
+            
             -none | --none      ) cmds=()
                 ;;
+            
             -a | -all | --all   ) cmds=( "${OPTIONS[@]}" )
                 ;;
-                    --no*       ) opt=${opt#'--no'}
+
+            --no*               ) opt=${opt#'--no'}
                                   # remove command
                                   cmds[ ${OPTIONS_CODE["$opt"]} ]=''
                                   ;;
+            
             -no*                ) opt=${opt#'-no'}
                                   # remove command
                                   cmds[ ${OPTIONS_CODE["$opt"]} ]=''
                                   ;;
-                    --*         ) opt=${opt#'--'}
+
+            --*                 ) opt=${opt#'--'}
                                   # Add command
                                   cmds[ ${OPTIONS_CODE["$opt"]} ]="$opt"
                                   ;;
@@ -367,7 +405,6 @@ function main() {
     ##
     # LIST STAGES ALREADY DONE
     #
-
     if [ -n "$listop" ]
     then
         stage_mark="${module_dir}/.${module_name}."
@@ -385,6 +422,27 @@ function main() {
 
 
     ##
+    # LIST MODULE'S SUBMODULES
+    #
+    if [ -n "$listsubmodules" ]
+    then
+        local submodules_list="$(get_submodules_list "${module_name}")"
+
+        for i in $(ls ${stage_mark}* )
+        do
+            stages_done="$stages_done ${i#$stage_mark}"
+        done
+
+        if [ -z "$submodules_list" ] 
+        then
+            ${DO} echo "[main] [LIST] Module:[$module_name] has no sub-module"
+        else
+            ${DO} echo "[main] [LIST] Module:[$module_name] sub-modules:[$submodules_list]"
+        fi
+        return 0
+    fi
+
+    ##
     # RUN COMMANDS
     #
 
@@ -394,9 +452,15 @@ function main() {
 
         if [ -e "${stage_mark}" ]
         then
-            logtrace "[main] Module:[$module_name] - Stage already done: $cmd"
+            logtrace "[main] Module:[$module_name] - Stage:[$cmd] already completed !"
         else
-            if ${DO} "_install_module_${cmd}"  "${module_name}"
+            local previous_cmd="${PREVIOUS_STAGE["$cmd"]}"
+
+            if [ -n "$previous_cmd" && ! -e "${module_dir}/.${module_name}.${previous_cmd}" ]
+            then
+                logtrace "[main] Module:[$module_name] - Previous stage:[$previous_cmd] must be completed first !"
+                return 1
+            elif ${DO} "_install_module_${cmd}"  "${module_name}"
             then
                 touch "${stage_mark}"
             fi
@@ -413,6 +477,7 @@ then
     OPTIONS:
         -d              --dryrun        # Tell what will be done but do not run it
         -l -list        --list          # List completed installations stages
+        -m              --list-modules  # List module's submodules
 
         -a -all         --all           # Run all installation stages
         -none           --none          # Run none (default)

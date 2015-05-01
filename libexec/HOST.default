@@ -52,6 +52,12 @@ export DBSERVER DBPORT
 
 
 #------------------------------------
+# SET /etc/hosts for local access
+#------------------------------------
+echo -e "\n##\n## Set by $(pwd)/$(basename $0) on $(date). Do not remove unless you know what you are doing!\n##\n127.0.0.1   $VHOST_SERVER_NAME $VHOST_SERVER_NAME_SSL $VHOST_SERVER_ALIAS $DEFAULT_DB_SERVER" >> /etc/hosts
+
+
+#------------------------------------
 # PRESTASHOP CREDENTIALS
 # WORDPRESS CREDENTIALS
 #   For the DB initialization
