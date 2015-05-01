@@ -17,28 +17,30 @@ WWW_INSTALLDIR=/Users/fpo/mutiny/buildtest
 #------------------------------------
 # Web Server
 #------------------------------------
+AWS_APPNAME='mutiny'
 WWW_CONF=/etc/apache2
  APACHE_RUN_USER="$(getconf  "${WWW_CONF}/httpd.conf"  '^User[[:space:]]+([\w_-]+)')"
 APACHE_RUN_GROUP="$(getconf  "${WWW_CONF}/httpd.conf"  '^Group[[:space:]]+([\w_-]+)')"
   APACHE_LOG_DIR="$(getconf  "${WWW_CONF}/httpd.conf"  '^ErrorLog[[:space:]]+['\''"]?(.*?)/[^/'\''"]+['\''"]?[[:space:]]*$')"
 VHOST_SERVER_NAME='mutinytahiti.local'
-VHOST_SERVER_ALIAS="www.mutinytahiti.local mutiny-tahiti.local www.mutiny-tahiti.local"
-VHOST_SERVER_ADMIN='webmaster@mutinytahiti.local'
+VHOST_SERVER_NAME_SSL='mutinytahiti.local'
+VHOST_SERVER_ALIAS="www.${VHOST_SERVER_NAME}"
+VHOST_SERVER_ADMIN="webmaster@${VHOST_SERVER_NAME}"
 VHOST_DOCUMENT_ROOT="${WWW_INSTALLDIR}"
-VHOST_ERRORLOG="${APACHE_LOG_DIR}/mutinytahiti.com.error.log"
-VHOST_CUSTOMLOG_1="${APACHE_LOG_DIR}/mutinytahiti.com.access.log"
+VHOST_ERRORLOG="${APACHE_LOG_DIR}/${VHOST_SERVER_NAME}.error.log"
+VHOST_CUSTOMLOG_1="${APACHE_LOG_DIR}/${VHOST_SERVER_NAME}.access.log"
 VHOST_CUSTOMLOG_MODE_1=combinedio
-VHOST_CUSTOMLOG_2="${APACHE_LOG_DIR}/mutinytahiti.com.access.log"
+VHOST_CUSTOMLOG_2="${APACHE_LOG_DIR}/${VHOST_SERVER_NAME}.access.log"
 VHOST_CUSTOMLOG_MODE_2=combinedio
 VHOST_INCLUDE_OPTIONAL_1=
 VHOST_INCLUDE_OPTIONAL_2=
 
-export WWW_CONF APACHE_RUN_USER APACHE_RUN_GROUP APACHE_LOG_DIR VHOST_SERVER_NAME VHOST_SERVER_ALIAS VHOST_SERVER_ADMIN VHOST_DOCUMENT_ROOT VHOST_ERRORLOG VHOST_CUSTOMLOG_1 VHOST_CUSTOMLOG_MODE_1 VHOST_CUSTOMLOG_2 VHOST_CUSTOMLOG_MODE_2 VHOST_INCLUDE_OPTIONAL_1 VHOST_INCLUDE_OPTIONAL_2
+export AWS_APPNAME WWW_CONF APACHE_RUN_USER APACHE_RUN_GROUP APACHE_LOG_DIR VHOST_SERVER_NAME VHOST_SERVER_NAME_SSL VHOST_SERVER_ALIAS VHOST_SERVER_ADMIN VHOST_DOCUMENT_ROOT VHOST_ERRORLOG VHOST_CUSTOMLOG_1 VHOST_CUSTOMLOG_MODE_1 VHOST_CUSTOMLOG_2 VHOST_CUSTOMLOG_MODE_2 VHOST_INCLUDE_OPTIONAL_1 VHOST_INCLUDE_OPTIONAL_2
 
 #------------------------------------
 # DATA STORE 
 #------------------------------------
-DEFAULT_DB_SERVER='sql.mutinytahiti.local'
+DEFAULT_DB_SERVER="sql.${VHOST_SERVER_NAME}"
 eval "DBSERVER=$(grep -m 1 -E 'SetEnv.+DBSERVER' "${WWW_CONF}/extra/httpd-vhosts.conf" | awk '{print $3}')"
 [ -z "${DBSERVER}" ] && DBSERVER="${DEFAULT_DB_SERVER}"
 
@@ -47,6 +49,30 @@ eval "DBPORT=$(grep -m 1 -E 'SetEnv.+DBPORT' "${WWW_CONF}/extra/httpd-vhosts.con
 [ -z "${DBPORT}" ] && DBPORT="${DEFAULT_DB_PORT}"
 
 export DBSERVER DBPORT
+
+
+#------------------------------------
+# PRESTASHOP CREDENTIALS
+# WORDPRESS CREDENTIALS
+#   For the DB initialization
+#------------------------------------
+STORE_NAME='MUTINY Tahiti - Island lovers unite'
+STORE_EMAIL="store-admin@${VHOST_SERVER_NAME}"
+STORE_CONTACT_1="store-admin@${VHOST_SERVER_NAME}"
+STORE_CONTACT_2="store-admin@${VHOST_SERVER_NAME}"
+ADMIN_LOGIN="store-admin@${VHOST_SERVER_NAME}"
+ADMIN_LASTNAME='Durand'
+ADMIN_FIRSTNAME='Pierre'
+ADMIN_ALIAS='mutinytahiti-store-admin'
+ADMIN_EMAIL="store-admin@${VHOST_SERVER_NAME}"
+ADMIN_PASSWORD='AmantesIslaUnidos'
+
+PS_COOKIE_KEY='TWQXdX6yOP8C0p2C9jS8c4145NvSjcxGba54FZGGe4WONJtdUq5Eaygx'
+PS_ADMIN_PASSWORD_CIPHERED="$(perl -MDigest::MD5 -e 'print Digest::MD5::md5_hex($ARGV[0])' -- ${PS_COOKIE_KEY}${ADMIN_PASSWORD})"
+WP_ADMIN_PASSWORD_CIPHERED='$P$B2xig7wMaIUpykG8f8uIQGV9erN8gS.'
+
+export STORE_NAME STORE_EMAIL STORE_CONTACT_1 STORE_CONTACT_2 ADMIN_LOGIN ADMIN_LASTNAME ADMIN_FIRSTNAME ADMIN_ALIAS ADMIN_EMAIL ADMIN_PASSWORD PS_COOKIE_KEY PS_ADMIN_PASSWORD_CIPHERED WP_ADMIN_PASSWORD_CIPHERED
+
 
 #------------------------------------
 # CONFIG FILES
@@ -60,14 +86,16 @@ declare -A CONFIG
 #   OP={install,append,tmpl.install,sed.install,tmpl.append,sed.append}
 
 ## TEST ##
-CONFIG[mutiny]="mutiny-apache2-conf mutiny-apache2-envvars mutiny-apache2-charset mutiny-apache2-mutiny-conf"
-CONFIG[store]="store-presta-settings"
-CONFIG[wordpress]="wordpress-config"
+CONFIG[mutiny]='apache2-conf apache2-envvars apache2-charset apache2-vhost-conf psdb-init-sql-tmpl wpdb-init-sql-tmpl'
+CONFIG[store]='store-presta-settings'
+CONFIG[wordpress]='wordpress-config'
 
-       CONFIG[mutiny-apache2-conf]="append       apache2.conf                   ${WWW_INSTALLDIR}/httpd.conf"
-    CONFIG[mutiny-apache2-envvars]="append       apache2.envvars                ${WWW_INSTALLDIR}/envvars"
-    CONFIG[mutiny-apache2-charset]="append       apache2.charset.conf           ${WWW_INSTALLDIR}/httpd.conf"
-CONFIG[mutiny-apache2-mutiny-conf]="tmpl.install apache2.mutiny.conf.tmpl       ${WWW_INSTALLDIR}/httpd-vhosts.conf"
-     CONFIG[store-presta-settings]="sed.install  prestashop.settings.php.tmpl   ${WWW_INSTALLDIR}/settings.inc.php"
-          CONFIG[wordpress-config]="sed.install  wordpress.config.php.tmpl      ${WWW_INSTALLDIR}/wp-config.php"
+         CONFIG[apache2-conf]="append       apache2.conf                   ${WWW_INSTALLDIR}/httpd.conf"
+      CONFIG[apache2-envvars]="append       apache2.envvars                ${WWW_INSTALLDIR}/envvars"
+      CONFIG[apache2-charset]="append       apache2.charset.conf           ${WWW_INSTALLDIR}/httpd.conf"
+   CONFIG[apache2-vhost-conf]="tmpl.install apache2.vhost.conf.tmpl        ${WWW_INSTALLDIR}/httpd-vhosts.conf"
+CONFIG[store-presta-settings]="sed.install  prestashop.settings.php.tmpl   ${WWW_INSTALLDIR}/settings.inc.php"
+     CONFIG[wordpress-config]="sed.install  wordpress.config.php.tmpl      ${WWW_INSTALLDIR}/wp-config.php"
+   CONFIG[psdb-init-sql-tmpl]="env.install  psdb.init.sql.tmpl             ${LIBDATA}/${SQL_PSDB}.init.sql                   644     - - "
+   CONFIG[wpdb-init-sql-tmpl]="env.install  wpdb.init.sql.tmpl             ${LIBDATA}/${SQL_WPDB}.init.sql                   644     - - "
 

@@ -16,13 +16,15 @@
 [ -z "${LIBEXEC}" ]     && LIBEXEC="$(pwd)"                 # $(pwd) because at this stage we must be positionned
                                                             # INSIDE the libexec directory by the caller, 
                                                             # who is supposed to have done a cd $(dirname $0)
+[ -z "${LIBDATA}" ]     && LIBDATA="${LIBEXEC}/../libdata"
 [ -z "${DEFINES}" ]     && DEFINES="${LIBEXEC}/DEFINES"
 [ -z "${UTILS}" ]       && UTILS="${LIBEXEC}/utils.sh"
 [ -z "${CONF}" ]        && CONF="${LIBEXEC}/conf"
-export LIBEXEC DEFINES UTILS CONF
+export LIBEXEC LIBDATA DEFINES UTILS CONF
 
 PATH="${LIBEXEC}:/opt/local/lib/mysql56/bin:/opt/local/sbin:/opt/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/X11/bin:/usr/games:/usr/local/games"
 export PATH
+
 
 #----------------------------------------
 # DEBUG
@@ -84,15 +86,6 @@ function do_continue () {
 #DO=do
 DO=do_trace
 
-#----------------------------------------
-# LOAD DEFINITIONS
-#----------------------------------------
-if [ -e "${DEFINES}" ]
-then
-    source "${DEFINES}"
-else
-    die "[${UTILS} Cannot locate mandatory dependancy:[${DEFINES}]"
-fi
 
 #----------------------------------------
 # TOOLS AVAILABILITY CHECKING
@@ -123,7 +116,6 @@ function __bootstrap() {
 # __nocmd cmd arg...
 #
 function __nocmd () {
-
     die "Unknown command: ${cmd} [$*]"
 }
 
@@ -138,6 +130,11 @@ __bootstrap APACHECTL apachectl __apachectl
 __bootstrap AWK awk __awk
     function __awk () {
         __nocmd awk "$*"
+    }
+
+__bootstrap BASH bash __bash
+    function __bash () {
+        __nocmd bash "$*"
     }
 
 __bootstrap CURL curl __curl
@@ -165,6 +162,11 @@ __bootstrap MYSQL mysql __mysql
         __nocmd mysql "$*"
     }
 
+__bootstrap PERL perl __perl
+    function __perl () {
+        __nocmd perl "$*"
+    }
+
 __bootstrap REALPATH realpath __realpath
     function __realpath () {
         echo "$1"
@@ -175,10 +177,27 @@ __bootstrap SED sed __sed
         __nocmd sed "$*"
     }
 
+__bootstrap TAR tar __tar
+    function __tar () {
+        __nocmd tar "$*"
+    }
+
 __bootstrap UNZIP unzip __unzip
     function __unzip () {
         __nocmd unzip "$*"
     }
+
+
+#----------------------------------------
+# LOAD DEFINITIONS
+#----------------------------------------
+if [ -e "${DEFINES}" ]
+then
+    source "${DEFINES}"
+else
+    die "[${UTILS} Cannot locate mandatory dependancy:[${DEFINES}]"
+fi
+
 
 #----------------------------------------
 # SCRIPT LAUNCHER
@@ -190,12 +209,14 @@ function _RUN_SCRIPT () {
     then
         if [ -x "${script}" ] 
         then
+            LIBDATA="${LIBDATA}"        \
             LIBEXEC="${LIBEXEC}"        \
             DEFINES="${DEFINES}"        \
             UTILS="${UTILS}"            \
             CONF="${CONF}"              \
                 $DO "${script}" "$@"
         else 
+            LIBDATA="${LIBDATA}"        \
             LIBEXEC="${LIBEXEC}"        \
             DEFINES="${DEFINES}"        \
             UTILS="${UTILS}"            \
@@ -275,6 +296,13 @@ function get_topmodule () {
 }
 
 ##
+# parent_module=$(get_parentmodule)
+#
+function get_parentmodule () {
+    echo "${PARENT_MODULE[$1]}"
+}
+
+##
 # submodules_list=$(get_submodules_list module_name)
 #
 function get_submodules_list () {
@@ -340,9 +368,13 @@ function install_config_files () {
 
     local tag
     local op
-    local src
-    local dst
-    local specs     # OP SRC DEST
+    local src_file
+    local dst_file
+    local mode_file
+    local uid_file
+    local gid_file
+    local force
+    local specs     # OP SRC DEST MODE UID GID
 
     for tag in ${CONFIG["${module_name}"]}
     do
@@ -351,7 +383,12 @@ function install_config_files () {
         op="$1"
         src_file="$2" 
         dst_file="$3" 
-        $DO install_one_config_file "${op}" "${CONF}/${src_file}" "${dst_file}" '640' "${WWWUID}" "${WWWGID}"   
+        mode_file="$4"; [ -z "$mode_file" ] && mode_file='640'
+        uid_file="$5";  [ -z "$uid_file"  ] && uid_file="${WWWUID}"
+        gid_file="$6";  [ -z "$gid_file"  ] && gid_file="${WWWGID}"
+        force="$7";
+
+        $DO install_one_config_file "${op}" "${CONF}/${src_file}" "${dst_file}" "${mode_file}" "${uid_file}" "${gid_file}" "${force}"
     done
 }
 
@@ -360,10 +397,15 @@ function install_one_config_file () {
     local op="$1"
     local src_file="$2"
     local dst_file="$3"
-    local mode="$4"
-    local uid="$5"
-    local gid="$6"
+    local mode_file="$4"
+    local uid_file="$5"
+    local gid_file="$6"
     local force="$7"
+
+    local ownership
+    [ "${uid_file}" != '-' ] && ownership="${uid_file}"
+    [ "${gid_file}" != '-' ] && ownership="${ownership}:${gid_file}"
+
 
     # Check local file exists
     [ ! -e "${src_file}" ] && die "[install_one_config_file] Source file:[${src_file}] does not exist."
@@ -376,7 +418,7 @@ function install_one_config_file () {
         then
             $DO mkdir -p "${dst_dir}"
             $DO chmod 750 "${dst_dir}"
-            $DO chown "${uid}:${gid}" "${dst_dir}"
+            [ -n "${ownership}" ] && $DO chown "${ownership}" "${dst_dir}"
         else
             die "[install_one_config_file] Destination directory:[${dst_dir}] does not exist."
         fi
@@ -393,8 +435,8 @@ function install_one_config_file () {
             else
                 # File does not exit. Simply installs it
                 $DO cp "${src_file}" "${dst_file}" 
-                $DO chmod "${mode}" "${dst_file}"
-                $DO chown "${uid}:${gid}" "${dst_file}"
+                $DO chmod "${mode_file}" "${dst_file}"
+                [ -n "${ownership}" ] && $DO chown "${ownership}" "${dst_file}"
             fi
             ;;
 
@@ -421,8 +463,8 @@ function install_one_config_file () {
             else
                 # File does not exit. Simply installs it
                 $DO cp "${src_file}" "${dst_file}" 
-                $DO chmod "${mode}" "${dst_file}"
-                $DO chown "${uid}:${gid}" "${dst_file}"
+                $DO chmod "${mode_file}" "${dst_file}"
+                [ -n "${ownership}" ] && $DO chown "${ownership}" "${dst_file}"
             fi
             ;;
 
@@ -430,7 +472,7 @@ function install_one_config_file () {
             local expanded_src_file="$(tmpl_expand_file "${src_file}")"
             [ $? -ne 0 -o -z "${expanded_src_file}" ] && exit 1
 
-            $DO install_one_config_file install "${expanded_src_file}" "${dst_file}" "${mode}" "${uid}" "${gid}" ${force}
+            $DO install_one_config_file install "${expanded_src_file}" "${dst_file}" "${mode_file}" "${uid_file}" "${gid_file}" ${force}
             rm -f "${expanded_src_file}"
             ;;
 
@@ -438,7 +480,7 @@ function install_one_config_file () {
             local expanded_src_file="$(tmpl_expand_file "${src_file}")"
             [ $? -ne 0 -o -z "${expanded_src_file}" ] && exit 1
 
-            $DO install_one_config_file append "${expanded_src_file}" "${dst_file}" "${mode}" "${uid}" "${gid}" ${force}
+            $DO install_one_config_file append "${expanded_src_file}" "${dst_file}" "${mode_file}" "${uid_file}" "${gid_file}" ${force}
             rm -f "${expanded_src_file}"
             ;;
 
@@ -446,7 +488,7 @@ function install_one_config_file () {
             local expanded_src_file="$(sed_expand_file "${src_file}")"
             [ $? -ne 0 -o -z "${expanded_src_file}" ] && exit 1
 
-            $DO install_one_config_file install "${expanded_src_file}" "${dst_file}" "${mode}" "${uid}" "${gid}" ${force}
+            $DO install_one_config_file install "${expanded_src_file}" "${dst_file}" "${mode_file}" "${uid_file}" "${gid_file}" ${force}
             rm -f "${expanded_src_file}"
             ;;
 
@@ -454,7 +496,23 @@ function install_one_config_file () {
             local expanded_src_file="$(sed_expand_file "${src_file}")"
             [ $? -ne 0 -o -z "${expanded_src_file}" ] && exit 1
 
-            $DO install_one_config_file append "${expanded_src_file}" "${dst_file}" "${mode}" "${uid}" "${gid}" ${force}
+            $DO install_one_config_file append "${expanded_src_file}" "${dst_file}" "${mode_file}" "${uid_file}" "${gid_file}" ${force}
+            rm -f "${expanded_src_file}"
+            ;;
+
+        'env.install')
+            local expanded_src_file="$(env_expand_file "${src_file}")"
+            [ $? -ne 0 -o -z "${expanded_src_file}" ] && exit 1
+
+            $DO install_one_config_file install "${expanded_src_file}" "${dst_file}" "${mode_file}" "${uid_file}" "${gid_file}" ${force}
+            rm -f "${expanded_src_file}"
+            ;;
+
+        'env.append')
+            local expanded_src_file="$(env_expand_file "${src_file}")"
+            [ $? -ne 0 -o -z "${expanded_src_file}" ] && exit 1
+
+            $DO install_one_config_file append "${expanded_src_file}" "${dst_file}" "${mode_file}" "${uid_file}" "${gid_file}" ${force}
             rm -f "${expanded_src_file}"
             ;;
 
@@ -484,7 +542,7 @@ EOT
 
 function sed_expand_file () {
     local src_file="$1"
-    [ ! -e "${src_file}" ] && die "[tmpl_expand_file] Cannot locate file:[${src_file}]"
+    [ ! -e "${src_file}" ] && die "[sed_expand_file] Cannot locate file:[${src_file}]"
 
     local sed_cmd_file="${src_file}.sed"
     [ ! -e "${sed_cmd_file}" ] && die "[sed_expand_file] Cannot locate sed command file:[${sed_cmd_file}]"
@@ -497,6 +555,18 @@ function sed_expand_file () {
     $SED -E -f "${expanded_sed_cmd_file}" "${src_file}" > "${file_E}"
 
     rm "${expanded_sed_cmd_file}"
+
+    echo "${file_E}"
+}
+
+# ${__ENV_VAR_NAME__} -> valeur de la variable d'environnement
+function env_expand_file () {
+    local src_file="$1"
+    [ ! -e "${src_file}" ] && die "[env_expand_file] Cannot locate file:[${src_file}]"
+
+    # 2. Apply sed commands
+    local file_E="/tmp/__tmp_E_$(date "+%s")"
+    cat "${src_file}" | $PERL -pe 's/\$\{__(.*?)__\}/$ENV{$1}/sge' > "${file_E}"
 
     echo "${file_E}"
 }

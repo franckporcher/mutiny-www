@@ -22,7 +22,7 @@ function getconf () {
 
     if [ -e "${file}" ]
     then
-        cat "${file}" | perl -ne "print \"\$1\" if m|${regex}|"
+        cat "${file}" | $PERL -ne "print \"\$1\" if m|${regex}|"
     else
         echo "file_not_found_${file}"
     fi
@@ -38,6 +38,16 @@ export CUSTOMDEFS
 
 source "${CUSTOMDEFS}"
 
+
+#----------------------------------------
+# WEB SERVER CREDENTIALS
+#----------------------------------------
+WWWUID="${APACHE_RUN_USER}"
+WWWGID="${APACHE_RUN_GROUP}"
+WWWHOME=~"${APACHE_RUN_GROUP}"
+export WWWUID WWWGID WWWHOME
+
+
 #----------------------------------------
 # APPLICATION MODULES
 #----------------------------------------
@@ -46,19 +56,24 @@ unset MODULES
 declare -A MODULES
 MODULES[root]='mutiny'
 MODULES[mutiny]='wordpress store cgm'
+MODULES[cgm]='perltrace perlerror perlmuffinmc'
 
-#----------------------------------------
-# WEB SERVER CREDENTIALS
-#----------------------------------------
-WWWUID="${APACHE_RUN_USER}"
-WWWGID="${APACHE_RUN_GROUP}"
-export WWWUID WWWGID
+unset PARENT_MODULE
+declare -A PARENT_MODULE
+PARENT_MODULE[mutiny]=''
+PARENT_MODULE[wordpress]='mutiny'
+PARENT_MODULE[store]='mutiny'
+PARENT_MODULE[cgm]='mutiny'
+PARENT_MODULE[perltrace]='cgm'
+PARENT_MODULE[perlerror]='cgm'
+PARENT_MODULE[perlmuffinmc]='cgm'
 
 #----------------------------------------
 # APP GIT MODULES 
 #----------------------------------------
 #GIT_URL="ssh://git@github.com/franckporcher"
-GIT_URL="https://git@github.com/franckporcher"
+#GIT_URL="https://git@github.com/franckporcher"
+GIT_URL="git://github.com/franckporcher"
 export GIT_URL
 
 # Git Modules
@@ -67,21 +82,26 @@ unset  CURRENT_RELEASE
 declare -A INITIAL_RELEASE
 declare -A CURRENT_RELEASE
 
-#            [MODULE_NAME] = GIT-REPOS_NAME  BRANCH_NAME            MODULE_DIR                      INSTALL_DIRAUXDIR
+#      RELEASE[ MODULE_NAME ] =         GIT-REPOS_NAME          BRANCH_NAME            MODULE_DIR                      INSTALL_DIRAUXDIR
 #
 # InstallDir should be either an absolute path,
 # or a relative path from <topinstalldir>/libexec
 # (from where all the scripts run)
-INITIAL_RELEASE[mutiny]="    mutiny-www      stable-v1.0            ${WWW_INSTALLDIR}"
-INITIAL_RELEASE[wordpress]=" mutiny-www-wp   init-4.1.1-v1.0        ${WWW_INSTALLDIR}/wordpress     ${WWW_INSTALLDIR}"
-INITIAL_RELEASE[store]="     mutiny-www-ps   init-1.6.0.14-v1.0     ${WWW_INSTALLDIR}/store"
-INITIAL_RELEASE[cgm]="       mutiny-www-cgm  stable-v1.0            ${WWW_INSTALLDIR}/cgm"
+INITIAL_RELEASE[mutiny]="               mutiny-www              stable-v1.0            ${WWW_INSTALLDIR}"
+INITIAL_RELEASE[wordpress]="            mutiny-www-wp           init-4.1.1-v1.0        ${WWW_INSTALLDIR}/wordpress     ${WWW_INSTALLDIR}"
+INITIAL_RELEASE[store]="                mutiny-www-ps           init-1.6.0.14-v1.0     ${WWW_INSTALLDIR}/store"
+INITIAL_RELEASE[cgm]="                  mutiny-www-cgm          stable-v1.0            ${WWW_INSTALLDIR}/cgm"
+INITIAL_RELEASE[perltrace]="            perl5-Franckys-Trace    v0.11-stable           ${WWW_INSTALLDIR}/cgm/modperl/FranckysTrace"
+INITIAL_RELEASE[perlerror]="            perl5-Franckys-Error    v0.11-stable           ${WWW_INSTALLDIR}/cgm/modperl/FranckysError"
+INITIAL_RELEASE[perlmuffinmc]="         perl5-Franckys-MuffinMC v0.11-stable           ${WWW_INSTALLDIR}/cgm/modperl/FranckysMuffinMC"
 
-CURRENT_RELEASE[mutiny]="    mutiny-www      stable-v1.0            ${WWW_INSTALLDIR}"
-CURRENT_RELEASE[wordpress]=" mutiny-www-wp   init-4.1.1-v1.0        ${WWW_INSTALLDIR}/wordpress     ${WWW_INSTALLDIR}"
-CURRENT_RELEASE[store]="     mutiny-www-ps   init-1.6.0.14-v1.0     ${WWW_INSTALLDIR}/store"
-CURRENT_RELEASE[cgm]="       mutiny-www-cgm  stable-v1.0            ${WWW_INSTALLDIR}/cgm"
-
+CURRENT_RELEASE[mutiny]="               mutiny-www              stable-v1.0            ${WWW_INSTALLDIR}"
+CURRENT_RELEASE[wordpress]="            mutiny-www-wp           init-4.1.1-v1.0        ${WWW_INSTALLDIR}/wordpress     ${WWW_INSTALLDIR}"
+CURRENT_RELEASE[store]="                mutiny-www-ps           init-1.6.0.14-v1.0     ${WWW_INSTALLDIR}/store"
+CURRENT_RELEASE[cgm]="                  mutiny-www-cgm          stable-v1.0            ${WWW_INSTALLDIR}/cgm"
+CURRENT_RELEASE[perltrace]="            perl5-Franckys-Trace    v0.11-stable           ${WWW_INSTALLDIR}/cgm/modperl/FranckysTrace"
+CURRENT_RELEASE[perlerror]="            perl5-Franckys-Error    v0.11-stable           ${WWW_INSTALLDIR}/cgm/modperl/FranckysError"
+CURRENT_RELEASE[perlmuffinmc]="         perl5-Franckys-MuffinMC v0.11-stable           ${WWW_INSTALLDIR}/cgm/modperl/FranckysMuffinMC"
 
 #----------------------------------------
 # MYSQL DB CREDENTIALS
@@ -93,7 +113,10 @@ SQL_ROOT=root
 SQL_DBADMIN='mutiny_db_admin'
 SQL_DBADMIN_PWD='AmantesIslaUnidos'
 
+# Prestashop
 SQL_PSDB=psmutiny
+
+# Wordpress
 SQL_WPDB=wpmutiny
 
 export SQL_DBSERVER SQL_ROOT SQL_DBADMIN SQL_DBADMIN_PWD SQL_PSDB SQL_WPDB

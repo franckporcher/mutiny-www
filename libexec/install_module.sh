@@ -53,7 +53,7 @@ function _install_module () {
     $DO _RUN_SCRIPT "$(get_pre "${SCRIPTNAME}" "${module_name}")" "${module_name}" "${module_dir}"
 
     #--------------------
-    # Pre-install module
+    # Install module
     # in its own directory
     #--------------------
     $DO $GIT clone --branch "${git_branch_name}" "$( git_url "${git_repos_name}" )" "${module_dir}"   \

@@ -44,10 +44,6 @@ define('DB_COLLATE', 'utf8_general_ci');
  *
  * @since 2.6.0
  */
-define('AUTH_KEY',          'O+G&@6{!/H/mSTHb&{OAwe$COx|CRrMMKCpT%+&M|U+_ghyUpgNXlXH7~u5Nmj}c');
-define('SECURE_AUTH_KEY',   '|h>p1?%[3ezRfRLnX:6|rlIi,pFBg7gb6c!PtJPGk*,2o!2$+NC*Sm]8SeY!nxN;');
-define('LOGGED_IN_KEY',     '*J=jte54_9|&EC#U%GdH_.y-V]H/{1UeJ9l]C(@{Ho-rXI.F*Ce]00;HB/8bMRq?');
-define('NONCE_KEY',         'Uw-$uD$x+/=T);|8*aT2x_<vI|2_+)L+B-*v2]&5tCk]<k=^e)rYaml~VbLpi+,I');
 define('AUTH_SALT',         '7y<!Wtcy4w,M,dR7=):XesU9s^%*O|M{8M<qZjdXWgB]ClEPt!+=_,/o^3+X-+:0');
 define('SECURE_AUTH_SALT',  '#P:{XmFo{tK+dYUF-2O-q^XN.z><ZuU&7]kiZRK6$xG^q| q)KI_#H<SDY!Fpfj4');
 define('LOGGED_IN_SALT',    'VicmiJq=EF~=meN,nv +xe8QM+KaE@R$]c%t{k)(&L*@U9k+bZx2RiSJGmy-8L#F');
