@@ -80,7 +80,7 @@ function main() {
     # Stage 1 Bootstrap : Install le chapeau
     local git_repos_name=mutiny-www
     local git_branch_name=stable-v1.0 
-    local fresh_install_dir=/tmp/mutiny
+    local fresh_install_dir=~/root/mutiny
 
     if [ ! -d "${fresh_install_dir}" ]
     then
@@ -92,7 +92,7 @@ function main() {
     ##
     # STAGE 2 Bootstrap : Install hooks and submodules using the installed libexec
     $DO cd "$fresh_install_dir/libexec"
-    $DO ./install_module.sh -bootstrap || die "[main] $(pwd)/boostrap.sh died: $!"
+    # $DO ./install_module.sh -bootstrap || die "[main] $(pwd)/boostrap.sh died: $!"
 }
 
 ${DO} main "$@"
