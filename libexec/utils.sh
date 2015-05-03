@@ -31,7 +31,7 @@ export PATH
 #----------------------------------------
 function log () {
     local msg="[$SCRIPTFQN (~$(pwd))] --> $*"
-    logger -s -t "$SCRIPTNAME" "$msg"
+    #logger -s -t "$SCRIPTNAME" "$msg"
 }
 
 function trace () {
