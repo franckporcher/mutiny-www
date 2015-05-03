@@ -66,7 +66,7 @@ fi
 
 if [ -e  "${CUSTOMDEFS}" ]
 then
-    "${CUSTOMDEFS}"
+    source "${CUSTOMDEFS}"
 fi
 
 export HOSTNAME OSNAME CUSTOMDEFS
