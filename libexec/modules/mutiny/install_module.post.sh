@@ -27,6 +27,14 @@ function main() {
 
     # RESTART APACHE
     $APACHECTL graceful
+
+    # Give Apache ownership over its configuration files
+    if [ -e  "${VHOST_CUSTOMLOG_1}" -o -e  "${VHOST_CUSTOMLOG_2}" ]
+    then
+        [ -e  "${VHOST_CUSTOMLOG_1}" ] && chown "${WWWUID}:${WWWGID}" "${VHOST_CUSTOMLOG_1}"
+        [ -e  "${VHOST_CUSTOMLOG_2}" ] && chown "${WWWUID}:${WWWGID}" "${VHOST_CUSTOMLOG_2}"
+        $APACHECTL graceful
+    fi
 }
 
 ${DO} main "$@"

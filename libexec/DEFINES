@@ -45,14 +45,30 @@ export SQL_ROOT SQL_DBADMIN SQL_DBADMIN_PWD SQL_PSDB SQL_WPDB
 
 
 #----------------------------------------
-# BOOTSTRAP CUSTOM DEFS FROM HOSTNAME
+# BOOTSTRAP CUSTOM DEFS FROM :
+#   (in thar order)
+#   . Machine's hostname
+#   . Machine's osname
+#   Use 'default' is no match
 #----------------------------------------
 HOSTNAME="$(hostname)"
-CUSTOMDEFS="HOST.${HOSTNAME}"
-[ ! -e "${CUSTOMDEFS}" ] && CUSTOMDEFS="HOST.default"
-export CUSTOMDEFS
+OSNAME="$(uname -o 2> /dev/null || uname -s 2> /dev/null)"  # -> Darwin on Mac, Linux on Linux
+OSNAME="${OSNAME,,*}"                                       # Small caps => darwin linux freebsd
+if   [ -e "HOST.${HOSTNAME}" ]
+then
+    CUSTOMDEFS="HOST.${HOSTNAME}"
+elif [ -e "HOST.${OSNAME}" ]
+    CUSTOMDEFS="HOST.${OSNAME}"
+else
+    CUSTOMDEFS="HOST.default"
+fi
 
-source "${CUSTOMDEFS}"
+if [ -e  "${CUSTOMDEFS}" ]
+then
+    "${CUSTOMDEFS}"
+fi
+
+export HOSTNAME OSNAME CUSTOMDEFS
 
 
 #----------------------------------------
