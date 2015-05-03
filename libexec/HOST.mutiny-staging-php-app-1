@@ -13,6 +13,7 @@
 # APPLICATION 
 #------------------------------------
 WWW_INSTALLDIR=/srv/www/mutiny/current
+export WWW_INSTALLDIR
 
 #------------------------------------
 # Web Server

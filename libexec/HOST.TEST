@@ -13,6 +13,7 @@
 # APPLICATION 
 #------------------------------------
 WWW_INSTALLDIR=/Users/fpo/mutiny/buildtest
+export WWW_INSTALLDIR
 
 #------------------------------------
 # Web Server

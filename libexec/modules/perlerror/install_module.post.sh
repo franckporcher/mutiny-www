@@ -42,7 +42,7 @@ function main() {
     local src="${module_dir}/lib/Franckys/${PMFILE}"
     local dest="${parent_dir}/Franckys/${PMFILE}"
     [ -e "$dest" ] && $DO rm "$dest"
-    $DO ln -s -f "${src}" "${dest}"
+    echo $DO ln -s -f "${src}" "${dest}"
 }
 
 ${DO} main "$@"

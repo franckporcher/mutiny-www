@@ -13,6 +13,7 @@
 # APPLICATION 
 #------------------------------------
 WWW_INSTALLDIR=~root/mutiny    #/var/root/mutiny
+export WWW_INSTALLDIR
 
 #------------------------------------
 # Web Server
