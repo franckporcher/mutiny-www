@@ -58,6 +58,7 @@ if   [ -e "HOST.${HOSTNAME}" ]
 then
     CUSTOMDEFS="HOST.${HOSTNAME}"
 elif [ -e "HOST.${OSNAME}" ]
+then
     CUSTOMDEFS="HOST.${OSNAME}"
 else
     CUSTOMDEFS="HOST.default"
