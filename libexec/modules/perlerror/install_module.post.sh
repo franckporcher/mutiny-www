@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# modules/perltrace/install_module.post.sh module_name module_dir
+# modules/perlerror/install_module.post.sh module_name module_dir
 #
 # PROJECT: MUTINY Tahiti's websites
 #
@@ -42,7 +42,7 @@ function main() {
     local src="${module_dir}/lib/Franckys/${PMFILE}"
     local dest="${parent_dir}/Franckys/${PMFILE}"
     [ -e "$dest" ] && $DO rm "$dest"
-    echo $DO ln -s -f "${src}" "${dest}"
+    $DO ln -s -f "${src}" "${dest}"
 }
 
 ${DO} main "$@"

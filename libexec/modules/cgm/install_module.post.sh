@@ -64,7 +64,7 @@ function install_perl_environment () {
     eval "$(plenv init -)"
     
     # 2. INSTALLING PERL-BUILD
-    ${DO} ${GIT} clone git://github.com/tokuhirom/Perl-Build.git "${envd}/plugins/perl-build/"
+    ${DO} ${GIT} clone git://github.com/tokuhirom/Perl-Build.git "${envd}/plenv/plugins/perl-build/"
     ${DO} plenv rehash
 
     # 3. INSTALLING Perl 5.20.1
@@ -77,14 +77,14 @@ function install_perl_environment () {
     # 4. INSTALLING CPANMINUS INTO THE CURRENT GLOBAL PERL
 	${DO} plenv install-cpanm
     
-    # 5. INSTALLING LOCAL::LIB for ~/perl5
+    # 5. INSTALLING CARTON
+    ${DO} cpanm Carton
+    
+    # 6. INSTALLING LOCAL::LIB for Carton
 	${DO} cpanm --local-lib="${module_dir}/local" local::lib
 	local perlstuff="$( ${DO} perl -I local/lib/perl5/ -Mlocal::lib=local )"
     eval  "${perlstuff}"
     echo "${perlstuff}" >> "${envd}/dot.bashrc"
-    
-    # 6. INSTALLING CARTON
-    ${DO} cpanm Carton
     
     # 7. DISTRO DEPLOYMENT (in module dir)
     ${DO} cd "${module_dir}"
