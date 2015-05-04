@@ -22,7 +22,7 @@
 [ -z "${CONF}" ]        && CONF="${LIBEXEC}/conf"
 export LIBEXEC LIBDATA DEFINES UTILS CONF
 
-PATH="${LIBEXEC}:/opt/local/lib/mysql56/bin:/opt/local/sbin:/opt/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/X11/bin:/usr/games:/usr/local/games"
+PATH="${LIBEXEC}:/usr/local/mysql/bin:/opt/local/lib/mysql56/bin:/opt/local/sbin:/opt/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/X11/bin"
 export PATH
 
 
