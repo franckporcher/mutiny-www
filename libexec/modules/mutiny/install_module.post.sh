@@ -26,7 +26,7 @@ function main() {
     local module_dir="$2"
 
     # RESTART APACHE
-    $APACHECTL graceful
+    $APACHECTL -k graceful
 
     # Give Apache ownership over its configuration files
     if [ -e  "${VHOST_CUSTOMLOG_1}" -o -e  "${VHOST_CUSTOMLOG_2}" -o -e "${VHOST_ERRORLOG}" ]
@@ -34,7 +34,7 @@ function main() {
         [ -e  "${VHOST_CUSTOMLOG_1}" ] && chown "${WWWUID}:${WWWGID}" "${VHOST_CUSTOMLOG_1}"
         [ -e  "${VHOST_CUSTOMLOG_2}" ] && chown "${WWWUID}:${WWWGID}" "${VHOST_CUSTOMLOG_2}"
         [ -e  "${VHOST_ERRORLOG}" ]    && chown "${WWWUID}:${WWWGID}" "${VHOST_ERRORLOG}"
-        $APACHECTL graceful
+        $APACHECTL -k graceful
     fi
 }
 

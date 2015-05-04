@@ -33,7 +33,7 @@ function main() {
     if [ "${install_dir}" != "${module_dir}" ]
     then
         pushd "${install_dir}"
-        chown -h "${WWWUID}:${WWWGID}" wp-* xmlrpc.php index.php license.txt readme.html
+        ${DO} chown -h "${WWWUID}:${WWWGID}" wp-* xmlrpc.php index.php license.txt readme.html
         popd
     fi
 

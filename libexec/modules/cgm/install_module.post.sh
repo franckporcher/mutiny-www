@@ -111,7 +111,7 @@ function main() {
     if cd "${module_dir}"
     then
         ${DO} install_perl_environment "${module_name}" "${module_dir}"
-        $APACHECTL graceful
+        $APACHECTL -k graceful
     else
         logtrace "[$SCRIPTNAME] Cannot cd:[module_dir]"
         return 1
