@@ -29,10 +29,11 @@ function main() {
     $APACHECTL graceful
 
     # Give Apache ownership over its configuration files
-    if [ -e  "${VHOST_CUSTOMLOG_1}" -o -e  "${VHOST_CUSTOMLOG_2}" ]
+    if [ -e  "${VHOST_CUSTOMLOG_1}" -o -e  "${VHOST_CUSTOMLOG_2}" -o -e "${VHOST_ERRORLOG}" ]
     then
         [ -e  "${VHOST_CUSTOMLOG_1}" ] && chown "${WWWUID}:${WWWGID}" "${VHOST_CUSTOMLOG_1}"
         [ -e  "${VHOST_CUSTOMLOG_2}" ] && chown "${WWWUID}:${WWWGID}" "${VHOST_CUSTOMLOG_2}"
+        [ -e  "${VHOST_ERRORLOG}" ]    && chown "${WWWUID}:${WWWGID}" "${VHOST_ERRORLOG}"
         $APACHECTL graceful
     fi
 }
