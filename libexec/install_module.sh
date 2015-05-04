@@ -258,6 +258,28 @@ function _install_module_postinstall () {
     fi
 }
 
+function _trace_in () {
+    local module_name step
+    module_name="$1"
+    step="$2"
+    
+    {
+        echo
+        echo "========[Installing module:${module_name^^*}]====[STARTING ${step^^*}]=============================================================" 
+    } 1>&2
+}
+
+function _trace_out () {
+    local module_name step
+    module_name="$1"
+    step="$2"
+    
+    {
+        echo "========[Installing module:${module_name^^*}]====[END ${step^^*}]=============================================================" 
+        echo
+    } 1>&2
+}
+
 
 #----------------------------------------
 # MAIN {module_name | -bootstrap} OPTIONS
@@ -321,6 +343,8 @@ function main() {
     local module_name="$1"
     shift
 
+    _trace_in "$module_name" 
+
     [ -z "${module_name}" ] && die "[main] Usage: $SCRIPTNAME module_name|-bootstrap OPTIONS"
 
     local module_dir
@@ -382,6 +406,7 @@ function main() {
     elif [ -z "${IS_MODULE["${module_name}"]}" ]
     then
         logtrace "[main] Module:[$module_name] - Not a module"
+        _trace_out "$module_name" 
         return 1
     fi
 
@@ -398,6 +423,7 @@ function main() {
     if [ -n "$dryop" ]
     then
         ${DO} echo "[main] [DRYRUN] Module:[$module_name] - Would run the commands --> $listop ${cmds[*]}"
+        _trace_out "$module_name" 
         return 0
     fi
 
@@ -417,6 +443,7 @@ function main() {
         done
 
         ${DO} echo "[main] [LIST] Module:[$module_name] - Installation stages already performed --> $stages_done"
+        _trace_out "$module_name" 
         return 0
     fi
 
@@ -439,6 +466,7 @@ function main() {
         else
             ${DO} echo "[main] [LIST] Module:[$module_name] sub-modules:[$submodules_list]"
         fi
+        _trace_out "$module_name" 
         return 0
     fi
 
@@ -455,15 +483,18 @@ function main() {
             if [ -n "$previous_cmd" ] && [ ! -e "${module_dir}/.${module_name}.${previous_cmd}" ]
             then
                 logtrace "[main] Module:[$module_name] - Previous stage:[$previous_cmd] must be completed first !"
+                _trace_out "$module_name" 
                 return 1
 
             # Preinstall stage : module_dir normally does not exist
             elif [ "${cmd}" == 'preinstall' ] && [ ! -d "${module_dir}" ]
             then
+                _trace_in "$module_name" "$cmd"
                 ${DO} "_install_module_${cmd}"  "${module_name}"
 
             # Other stages : module_dir normally exists
             else
+                _trace_in "$module_name" "$cmd"
                 stage_mark="${module_dir}/.${module_name}.${cmd}"
 
                 if [ -e "${stage_mark}" ]
@@ -475,8 +506,10 @@ function main() {
                     touch "${stage_mark}" 
                 fi
             fi
+            _trace_out "$module_name" "$cmd"
         fi
     done
+    _trace_out "$module_name" 
 }
 
 if [ $# -lt 1 ]
