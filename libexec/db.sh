@@ -116,7 +116,7 @@ function _mysql_dump_db () {
     local DBNAME="$1"
     local SQLFILE="$2"
     [ -z "${SQLFILE}" ] && SQLFILE="${DBNAME}.sql"
-    ${DO} mysqldump "--host=${SQL_DBSERVER}" -u "${SQL_DBADMIN}" "--password=${SQL_DBADMIN_PWD}" "${DBNAME}" > "${SQLFILE}"
+    ${DO} ${MYSQLDUMP} "--host=${SQL_DBSERVER}" -u "${SQL_DBADMIN}" "--password=${SQL_DBADMIN_PWD}" "${DBNAME}" > "${SQLFILE}"
 }
 
 function _mysql_restore_db () {
@@ -125,7 +125,7 @@ function _mysql_restore_db () {
     [ -z "${SQLFILE}" ] && SQLFILE="${DBNAME}.sql"
     if [ -e "${SQLFILE}" ]
     then 
-        ${DO} mysql "--host=${SQL_DBSERVER}" -u "${SQL_DBADMIN}" "--password=${SQL_DBADMIN_PWD}" "${DBNAME}" < "${SQLFILE}"
+        ${DO} ${MYSQL} "--host=${SQL_DBSERVER}" -u "${SQL_DBADMIN}" "--password=${SQL_DBADMIN_PWD}" "${DBNAME}" < "${SQLFILE}"
     else
         die "Cannot locate sql-file: ${SQLFILE}"
     fi
@@ -133,7 +133,7 @@ function _mysql_restore_db () {
 
 function _mysql_reset_db () {
     local DBNAME="$1"
-    ${DO} mysql --force "--host=${SQL_DBSERVER}" -u "${SQL_ROOT}" -p <<-EOT
+    ${DO} ${MYSQL} --force "--host=${SQL_DBSERVER}" -u "${SQL_ROOT}" -p <<-EOT
         DROP DATABASE ${DBNAME};
         CREATE DATABASE ${DBNAME} CHARSET utf8 COLLATE 'utf8_general_ci';
         GRANT ALL PRIVILEGES ON ${DBNAME}.* TO '${SQL_DBADMIN}';
@@ -141,7 +141,7 @@ EOT
 }
 
 function _mysql_init_all () {
-    ${DO} mysql --force "--host=${SQL_DBSERVER}" -u "${SQL_ROOT}" -p <<-EOT
+    ${DO} ${MYSQL} --force "--host=${SQL_DBSERVER}" -u "${SQL_ROOT}" -p <<-EOT
         GRANT ALL PRIVILEGES ON *.* TO '${SQL_ROOT}' WITH GRANT OPTION;
 
         DROP USER '${SQL_DBADMIN}';

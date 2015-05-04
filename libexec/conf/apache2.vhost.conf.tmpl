@@ -13,22 +13,38 @@ NameVirtualHost *:443
     ##
     ## PUBLIC content served by this server
     ##
-    DocumentRoot        	"${VHOST_DOCUMENT_ROOT}"
+    DocumentRoot        	"${VHOST_DOCUMENT_ROOT}/wordpress"
 
-    <IfModule dir_module>
+    ##
+    ## Home (Wordpress)
+    ##
+    <Directory "${VHOST_DOCUMENT_ROOT}/wordpress">
         DirectoryIndex  index.php
-    </IfModule>
-    
-    <Directory "${VHOST_DOCUMENT_ROOT}">
     	Options FollowSymLinks
         AllowOverride All
         Order allow,deny
         Allow from all
     </Directory>
-    
+
+    <Directory "${VHOST_DOCUMENT_ROOT}/wordpress/wp-admin">
+        SSLRequireSSL
+        #SSLOptions      +StdEnvVars -StrictRequire
+        #SSLVerifyClient optional
+        #SSLVerifyDepth  1
+    </Directory>
+
+
     ##
-    ## PRIVATE content served thru SSL - for administration
+    ## Store (Prestashop)
     ##
+    Alias "/store" "${VHOST_DOCUMENT_ROOT}/store"
+    <Directory "${VHOST_DOCUMENT_ROOT}/store">
+        DirectoryIndex  index.php
+    	Options FollowSymLinks
+        AllowOverride All
+        Order allow,deny
+        Allow from all
+    </Directory>
     <Directory "${VHOST_DOCUMENT_ROOT}/store/admin3fep">
         SSLRequireSSL
         #SSLOptions      +StdEnvVars -StrictRequire
@@ -36,13 +52,6 @@ NameVirtualHost *:443
         #SSLVerifyDepth  1
     </Directory>
     
-    <Directory "${VHOST_DOCUMENT_ROOT}/wp-admin">
-        SSLRequireSSL
-        #SSLOptions      +StdEnvVars -StrictRequire
-        #SSLVerifyClient optional
-        #SSLVerifyDepth  1
-    </Directory>
-
 
     ##
     ## CGM -> proxy to Local Perl Plack server on ${WWWPERL_SERVER_PORT}
@@ -76,7 +85,7 @@ NameVirtualHost *:443
     CustomLog  "${VHOST_CUSTOMLOG_1}" "${VHOST_CUSTOMLOG_MODE_1}"
     CustomLog  "${VHOST_CUSTOMLOG_2}" "${VHOST_CUSTOMLOG_MODE_2}"
     
-    FileETag none
+    FileETag    MTime Size
     
     RewriteEngine On
    
@@ -86,6 +95,8 @@ NameVirtualHost *:443
     SetEnv "DBSERVER" "${DBSERVER}"
     SetEnv "DBPORT"   "${DBPORT}"
 </VirtualHost>
+
+
 
 ###
 ### Secure site for administration
@@ -102,22 +113,45 @@ NameVirtualHost *:443
     SSLCertificateKeyFile   "${WWW_CONF}/ssl/mutinytahiti.com.key"
   	SetEnvIf User-Agent ".*MSIE.*" nokeepalive ssl-unclean-shutdown downgrade-1.0 force-response-1.0
     
+
     ##
-    ## Content served by this server
+    ## PUBLIC content served by this server
     ##
-    DocumentRoot        "${VHOST_DOCUMENT_ROOT}"
-    
-    <IfModule dir_module>
+    DocumentRoot        	"${VHOST_DOCUMENT_ROOT}/wordpress"
+
+
+    ##
+    ## Admin (Wordpress)
+    ##
+    <Directory "${VHOST_DOCUMENT_ROOT}/wordpress">
         DirectoryIndex  index.php
-    </IfModule>
-    
-    <Directory "${VHOST_DOCUMENT_ROOT}">
     	Options FollowSymLinks
-    	AllowOverride All
+        AllowOverride All
         Order allow,deny
         Allow from all
+        SSLRequireSSL
+        #SSLOptions      +StdEnvVars -StrictRequire
+        #SSLVerifyClient optional
+        #SSLVerifyDepth  1
     </Directory>
-  	
+
+
+    ##
+    ## Admin Store (Prestashop)
+    ##
+    Alias "/store" "${VHOST_DOCUMENT_ROOT}/store"
+    <Directory "${VHOST_DOCUMENT_ROOT}/store">
+        DirectoryIndex  index.php
+    	Options FollowSymLinks
+        AllowOverride All
+        Order allow,deny
+        Allow from all
+        SSLRequireSSL
+        #SSLOptions      +StdEnvVars -StrictRequire
+        #SSLVerifyClient optional
+        #SSLVerifyDepth  1
+    </Directory>
+    
     <Directory ~ "\.svn">
     	Order allow,deny
     	Deny from all
@@ -136,7 +170,7 @@ NameVirtualHost *:443
     CustomLog  "${VHOST_CUSTOMLOG_1}" "${VHOST_CUSTOMLOG_MODE_1}"
     CustomLog  "${VHOST_CUSTOMLOG_2}" "${VHOST_CUSTOMLOG_MODE_2}"
     
-    FileETag none
+    FileETag    MTime Size
     
     RewriteEngine On
     

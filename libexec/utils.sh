@@ -174,6 +174,11 @@ __bootstrap MYSQL mysql __mysql
         __nocmd mysql "$*"
     }
 
+__bootstrap MYSQLDUMP mysqldump __mysqldump
+    function __mysqldump () {
+        __nocmd mysqldump "$*"
+    }
+
 __bootstrap PERL perl __perl
     function __perl () {
         __nocmd perl "$*"
