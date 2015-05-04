@@ -116,6 +116,9 @@ PLACK_PORT='${WWWPERL_SERVER_PORT}'
 export PLACK_HOST PLACK_PORT
 
 EOT
+
+    # Launch the server
+    nohup ./runplack-operational.sh &
     ${DO} popd
 }
 
