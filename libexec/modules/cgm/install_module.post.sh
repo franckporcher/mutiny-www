@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# modules/cgm/install_module.pre.sh module_name module_dir
+# modules/cgm/install_module.post.sh module_name module_dir
 #
 # PROJECT: MUTINY Tahiti's websites
 #
@@ -43,19 +43,32 @@ function install_perl_environment () {
 		exit 1
 	fi
 
-	#
-	# Env for plenv, carton, capnm, perl versions, etc.
-	#
+    # 0. INIT PERL PRIVATE CORRECT ENV
     [ ! -d "${envd}"  ] && mkdir -p "${envd}"
+
+    {
+        cat <<-'EOT'
+
+        # CLEAN PERL-ENV CONTEXT
+        local perlvars plvar
+        perlvars="$(env | grep -E '^PERL' | cut -d '=' -f 1)"
+        for plvar in $perlvars
+        do
+            unset $plvar
+        done
+
+        PATH='/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin'
+        export PATH
+EOT
+    } > "${envd}/dot.bashrc"
 
 
     # I. PLENV 
     # /!\ => we are in module_dir
     # --------
     ${DO} ${GIT} clone git://github.com/tokuhirom/plenv.git "${envd}/plenv"
-    echo 'PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"; export PATH'    > "${envd}/dot.bashrc"
     echo "PATH=\"${envd}/plenv/bin:\$PATH\";            "   >> "${envd}/dot.bashrc"
-    echo "PLENV_ROOT=\"${envd}/plenv\"; export PLENV_ROOT" >> "${envd}/dot.bashrc"
+    echo "PLENV_ROOT=\"${envd}/plenv\"; export PLENV_ROOT"  >> "${envd}/dot.bashrc"
 
     PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"
     PATH="${envd}/plenv/bin:$PATH"
