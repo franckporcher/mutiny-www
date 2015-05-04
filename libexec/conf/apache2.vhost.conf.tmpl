@@ -42,6 +42,21 @@ NameVirtualHost *:443
         #SSLVerifyClient optional
         #SSLVerifyDepth  1
     </Directory>
+
+
+    ##
+    ## CGM -> proxy to Local Perl Plack server on ${WWWPERL_SERVER_PORT}
+    ##
+    ProxyPass           ${WWWPERL_SERVER_ROOTURL}/      http://${WWWPERL_SERVER_IP}:${WWWPERL_SERVER_PORT}${WWWPERL_SERVER_ROOTURL}/      keepalive=On
+    ProxyPass           ${WWWPERL_SERVER_ROOTURL}       http://${WWWPERL_SERVER_IP}:${WWWPERL_SERVER_PORT}${WWWPERL_SERVER_ROOTURL}       keepalive=On
+    ProxyPassReverse    ${WWWPERL_SERVER_ROOTURL}/      http://${WWWPERL_SERVER_IP}:${WWWPERL_SERVER_PORT}${WWWPERL_SERVER_ROOTURL}/
+    ProxyPassReverse    ${WWWPERL_SERVER_ROOTURL}       http://${WWWPERL_SERVER_IP}:${WWWPERL_SERVER_PORT}${WWWPERL_SERVER_ROOTURL}
+    #ProxyPassMatch      ^/(cgm/.*)$     http://${WWWPERL_SERVER_IP}:${WWWPERL_SERVER_PORT}/$1        keepalive=On
+    <Proxy *>
+        Order allow,deny
+        Allow from all
+    </Proxy>
+	
 	
     <Directory ~ "\.svn">
     	Order allow,deny

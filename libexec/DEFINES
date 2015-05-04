@@ -82,6 +82,14 @@ export WWWUID WWWGID WWWHOME
 
 
 #----------------------------------------
+# PERL CGM PROXIED LOCAL SERVER
+#----------------------------------------
+WWWPERL_SERVER_IP='127.0.0.1'
+WWWPERL_SERVER_PORT='8080'
+WWWPERL_SERVER_ROOTURL='/cgm'
+
+
+#----------------------------------------
 # APPLICATION MODULES
 #----------------------------------------
 # Modules Arborescence
