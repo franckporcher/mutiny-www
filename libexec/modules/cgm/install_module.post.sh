@@ -49,16 +49,21 @@ function install_perl_environment () {
     {
         cat <<-'EOT'
 
-        # CLEAN PERL-ENV CONTEXT
-        local perlvars plvar
-        perlvars="$(env | grep -E '^PERL' | cut -d '=' -f 1)"
-        for plvar in $perlvars
-        do
-            unset $plvar
-        done
+# CLEAN PERL-ENV CONTEXT
+function _clean_plenv () {
+    local perlvars plvar
+    perlvars="$(env | grep -E '^PERL' | cut -d '=' -f 1)"
+    for plvar in $perlvars
+    do
+        unset $plvar
+    done
+}
 
-        PATH='/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin'
-        export PATH
+_clean_plenv
+
+PATH='/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin'
+export PATH
+
 EOT
     } > "${envd}/dot.bashrc"
 
