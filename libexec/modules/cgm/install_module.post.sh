@@ -23,6 +23,8 @@ source "$UTILS"
 #----------------------------------------
 # Perl & Bash environment
 #----------------------------------------
+
+${DO} main "$@"
 function install_perl_environment () {
     local module_name="$1"
     local module_dir="$2"
@@ -62,31 +64,39 @@ function install_perl_environment () {
 
     echo 'eval "$(plenv init -)"' >> "${envd}/dot.bashrc"
     eval "$(plenv init -)"
+
+    # 2. CLEAR PERL ENVIRONMENT FOR A CLEAN BUILT
+    local x v
+    x="$(env | grep -E '^PERL' | cut -d '=' -f 1)"
+    for v in $x
+    do
+        unset $v
+    done
     
-    # 2. INSTALLING PERL-BUILD
+    # 3. INSTALLING PERL-BUILD
     ${DO} ${GIT} clone git://github.com/tokuhirom/Perl-Build.git "${envd}/plenv/plugins/perl-build/"
     ${DO} plenv rehash
 
-    # 3. INSTALLING Perl 5.20.1
+    # 4. INSTALLING Perl 5.20.1
     ${DO} plenv install 5.20.1
     ${DO} plenv rehash # Rebuild the shim executables
     
     # Set the global Perl version
     ${DO} plenv global 5.20.1
     
-    # 4. INSTALLING CPANMINUS INTO THE CURRENT GLOBAL PERL
+    # 5. INSTALLING CPANMINUS INTO THE CURRENT GLOBAL PERL
 	${DO} plenv install-cpanm
     
-    # 5. INSTALLING CARTON
+    # 6. INSTALLING CARTON
     ${DO} cpanm Carton
     
-    # 6. INSTALLING LOCAL::LIB for Carton
+    # 7. INSTALLING LOCAL::LIB for Carton
 	${DO} cpanm --local-lib="${module_dir}/local" local::lib
 	local perlstuff="$( ${DO} perl -I local/lib/perl5/ -Mlocal::lib=local )"
     eval  "${perlstuff}"
     echo "${perlstuff}" >> "${envd}/dot.bashrc"
     
-    # 7. DISTRO DEPLOYMENT (in module dir)
+    # 8. DISTRO DEPLOYMENT (in module dir)
     ${DO} cd "${module_dir}"
     ${DO} ${TAR} xzf carton.deploy.tgz 
     # Check get cpanfile and cpanfile.snapshot
@@ -138,7 +148,7 @@ function main() {
         ${DO} install_perl_environment "${module_name}" "${module_dir}"
         $APACHECTL -k graceful
     else
-        logtrace "[$SCRIPTNAME] Cannot cd:[module_dir]"
+        logtrace "[$SCRIPTNAME] Cannot cd:[$module_dir]"
         return 1
     fi
 

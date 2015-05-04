@@ -238,6 +238,34 @@ function _RUN_SCRIPT () {
     fi
 }
 
+
+#----------------------------------------
+# EXEC SCRIPT
+#----------------------------------------
+function _EXEC_SCRIPT () {
+    local script="$1"; shift
+
+    if [ -e "${script}" ]
+    then
+        if [ -x "${script}" ] 
+        then
+            LIBDATA="${LIBDATA}"        \
+            LIBEXEC="${LIBEXEC}"        \
+            DEFINES="${DEFINES}"        \
+            UTILS="${UTILS}"            \
+            CONF="${CONF}"              \
+                $DO exec "${script}" "$@"
+        else 
+            LIBDATA="${LIBDATA}"        \
+            LIBEXEC="${LIBEXEC}"        \
+            DEFINES="${DEFINES}"        \
+            UTILS="${UTILS}"            \
+            CONF="${CONF}"              \
+                $DO exec $BASH "${script}" "$@"
+        fi
+    fi
+}
+
 #----------------------------------------
 # FILE STUFF
 #----------------------------------------
