@@ -22,6 +22,7 @@ NameVirtualHost *:443
         DirectoryIndex  index.php
     	Options FollowSymLinks
         AllowOverride All
+        Require all granted
         Order allow,deny
         Allow from all
     </Directory>
@@ -42,6 +43,7 @@ NameVirtualHost *:443
         DirectoryIndex  index.php
     	Options FollowSymLinks
         AllowOverride All
+        Require all granted
         Order allow,deny
         Allow from all
     </Directory>
@@ -63,6 +65,7 @@ NameVirtualHost *:443
     #ProxyPassMatch      ^/(cgm/.*)$     http://${WWWPERL_SERVER_IP}:${WWWPERL_SERVER_PORT}/$1        keepalive=On
     <Proxy *>
         Order allow,deny
+        Require all granted
         Allow from all
     </Proxy>
 	
@@ -127,6 +130,7 @@ NameVirtualHost *:443
         DirectoryIndex  index.php
     	Options FollowSymLinks
         AllowOverride All
+        Require all granted
         Order allow,deny
         Allow from all
         SSLRequireSSL
@@ -144,6 +148,7 @@ NameVirtualHost *:443
         DirectoryIndex  index.php
     	Options FollowSymLinks
         AllowOverride All
+        Require all granted
         Order allow,deny
         Allow from all
         SSLRequireSSL

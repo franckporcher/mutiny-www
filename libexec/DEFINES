@@ -145,7 +145,7 @@ declare -A CURRENT_RELEASE
 # or a relative path from <topinstalldir>/libexec
 # (from where all the scripts run)
 INITIAL_RELEASE[mutiny]="               mutiny-www              stable-v1.0            ${WWW_INSTALLDIR}"
-INITIAL_RELEASE[wordpress]="            mutiny-www-wp           init-4.1.1-v1.0        ${WWW_INSTALLDIR}/wordpress     ${WWW_INSTALLDIR}"
+INITIAL_RELEASE[wordpress]="            mutiny-www-wp           init-4.1.1-v1.0        ${WWW_INSTALLDIR}/wordpress"
 INITIAL_RELEASE[store]="                mutiny-www-ps           init-1.6.0.14-v1.0     ${WWW_INSTALLDIR}/store"
 INITIAL_RELEASE[cgm]="                  mutiny-www-cgm          stable-v1.0            ${WWW_INSTALLDIR}/cgm"
 INITIAL_RELEASE[perltrace]="            perl5-Franckys-Trace    v0.11-stable           ${WWW_INSTALLDIR}/cgm/modperl/FranckysTrace"
@@ -153,7 +153,7 @@ INITIAL_RELEASE[perlerror]="            perl5-Franckys-Error    v0.11-stable    
 INITIAL_RELEASE[perlmuffinmc]="         perl5-Franckys-MuffinMC v0.11-stable           ${WWW_INSTALLDIR}/cgm/modperl/FranckysMuffinMC"
 
 CURRENT_RELEASE[mutiny]="               mutiny-www              stable-v1.0            ${WWW_INSTALLDIR}"
-CURRENT_RELEASE[wordpress]="            mutiny-www-wp           init-4.1.1-v1.0        ${WWW_INSTALLDIR}/wordpress     ${WWW_INSTALLDIR}"
+CURRENT_RELEASE[wordpress]="            mutiny-www-wp           init-4.1.1-v1.0        ${WWW_INSTALLDIR}/wordpress"
 CURRENT_RELEASE[store]="                mutiny-www-ps           init-1.6.0.14-v1.0     ${WWW_INSTALLDIR}/store"
 CURRENT_RELEASE[cgm]="                  mutiny-www-cgm          stable-v1.0            ${WWW_INSTALLDIR}/cgm"
 CURRENT_RELEASE[perltrace]="            perl5-Franckys-Trace    v0.11-stable           ${WWW_INSTALLDIR}/cgm/modperl/FranckysTrace"

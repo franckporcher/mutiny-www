@@ -1,0 +1,8 @@
+.mutiny.config
+.mutiny.install
+.mutiny.midinstall
+.mutiny.postinstall
+.mutiny.submodules
+./wordpress
+./store
+./cgm
