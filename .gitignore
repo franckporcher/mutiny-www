@@ -3,7 +3,7 @@
 .mutiny.midinstall
 .mutiny.postinstall
 .mutiny.submodules
-./wordpress
-./store
-./cgm
-./libdata/*
+wordpress
+store
+cgm
+libdata/*
