@@ -173,9 +173,10 @@ export SQL_DBSERVER
 #----------------------------------------
 # INSTALLATION HELPERS
 #----------------------------------------
-BOOTSTRAP_MODULE='bootstrap.sh'
+BOOTSTRAP_MODULE='bootstrap.local.sh'
+AWS_BOOTSTRAP_MODULE='aws-bootstrap-stage2.sh'
 INSTALL_MODULE='install_module.sh'
 UPDATE_MODULE='update_module.sh'
 
-export BOOTSTRAP_MODULE INSTALL_MODULE UPDATE_MODULE
+export AWS_BOOTSTRAP_MODULE BOOTSTRAP_MODULE INSTALL_MODULE UPDATE_MODULE
 

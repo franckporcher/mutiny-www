@@ -22,7 +22,7 @@ AWS_APPNAME='mutiny'
 WWW_CONF=/etc/apache2
 APACHE_RUN_USER="$(getconf "${WWW_CONF}/envvars" 'APACHE_RUN_USER=([\w_-]+)')"
 APACHE_RUN_GROUP="$(getconf "${WWW_CONF}/envvars" 'APACHE_RUN_GROUP=([\w_-]+)')"
-APACHE_LOG_DIR="$(getconf "${WWW_CONF}/envvars" 'APACHE_LOG_DIR=([\w_-]+)')"
+APACHE_LOG_DIR="$(getconf "${WWW_CONF}/envvars" 'APACHE_LOG_DIR=([/\w_-]+)')"
 VHOST_SERVER_NAME='mutinytahiti.com'
 VHOST_SERVER_NAME_SSL='mutinytahiti.com'
 VHOST_SERVER_ALIAS="dev.${VHOST_SERVER_NAME}"
