@@ -27,6 +27,11 @@ else
     exit 1
 fi
 
+function dryrun () {
+    echo "[DRYRUN] Module:[$module_name] -> $*" 1>&2
+    return 0
+}
+
 
 ##
 # _prereinstall module_name module_dir
@@ -182,7 +187,7 @@ function main() {
 
             --no*               ) opt=${opt#'--no'}
                                   # remove command
-                                  if [ -n "${OPTIONS_CODE["$opt"]}" ]
+                                  if [ -n "$opt" ] && [ -n "${OPTIONS_CODE["$opt"]}" ]
                                   then
                                     cmds[ ${OPTIONS_CODE["$opt"]} ]=''
                                   fi
@@ -190,7 +195,7 @@ function main() {
             
             -no*                ) opt=${opt#'-no'}
                                   # remove command
-                                  if [ -n "${OPTIONS_CODE["$opt"]}" ]
+                                  if [ -n "$opt" ] && [ -n "${OPTIONS_CODE["$opt"]}" ]
                                   then
                                      cmds[ ${OPTIONS_CODE["$opt"]} ]=''
                                   fi
@@ -198,7 +203,7 @@ function main() {
 
             --*                 ) opt=${opt#'--'}
                                   # Add command
-                                  if [ -n "${OPTIONS_CODE["$opt"]}" ]
+                                  if [ -n "$opt" ] && [ -n "${OPTIONS_CODE["$opt"]}" ]
                                   then
                                     cmds[ ${OPTIONS_CODE["$opt"]} ]="$opt"
                                   fi
@@ -206,7 +211,7 @@ function main() {
 
             -*                  ) opt=${opt#'-'}
                                   # Add command
-                                  if [ -n "${OPTIONS_CODE["$opt"]}" ]
+                                  if [ -n "$opt" ] && [ -n "${OPTIONS_CODE["$opt"]}" ]
                                   then
                                     cmds[ ${OPTIONS_CODE["$opt"]} ]="$opt"
                                   fi
@@ -240,9 +245,8 @@ function main() {
     #
     if [ -n "$dryop" ]
     then
-        ${DO} echo "[main] [DRYRUN] Module:[$module_name] - Would run the commands --> $listop ${cmds[*]}"
-        _trace_out "$module_name" 
-        return 0
+        # ${DO} echo "[main] [DRYRUN] Module:[$module_name] - Would run the commands --> $listop ${cmds[*]}"
+        DO=dryrun
     fi
 
 
@@ -281,7 +285,7 @@ function main() {
     local reinstall_script
     if [ "${module_name}" == "$(get_topmodule)" ]
     then
-        cp "${LIBEXEC}/bootstrap.local.sh" /tmp
+        ${DO} cp "${LIBEXEC}/bootstrap.local.sh" /tmp
         reinstall_script="/tmp/bootstrap.local.sh"
     else
         reinstall_script="${LIBEXEC}/install_module.sh"
@@ -291,7 +295,7 @@ function main() {
     # 1. prereinstall
     if [ -n "${do_prereinstall_flag}" ]
     then
-        _prereinstall_module "${module_name}" "${module_dir}" || {
+        ${DO} _prereinstall_module "${module_name}" "${module_dir}" || {
             local cr="$?"
             _trace_out "$module_name" 
             return "$cr"
@@ -299,21 +303,24 @@ function main() {
     fi
     if [ -d "${module_dir}" ]
     then
-        rm -rf "${module_dir}"
+        ${DO} rm -rf "${module_dir}"
     fi
 
     # 2. Reinstall module
     local options
     for opt in "${cmds[@]}"
     do
-        options="${options} --${opt}"
+        if [ -n "$opt" ]
+        then
+            options="${options} --${opt}"
+        fi
     done
-    $DO _RUN_SCRIPT "${reinstall_script}" "${module_name}" $options
+    ${DO} _RUN_SCRIPT "${reinstall_script}" "${module_name}" $options
 
     # 3. postreinstall
     if [ -n "${do_postreinstall_flag}" ]
     then
-        _postreinstall_module "${module_name}" "${module_dir}" || {
+        ${DO} _postreinstall_module "${module_name}" "${module_dir}" || {
             local cr="$?"
             _trace_out "$module_name" 
             return "$cr"

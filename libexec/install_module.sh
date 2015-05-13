@@ -377,21 +377,33 @@ function main() {
 
             --no*               ) opt=${opt#'--no'}
                                   # remove command
-                                  cmds[ ${OPTIONS_CODE["$opt"]} ]=''
+                                  if [ -n "$opt" ] && [ -n "${OPTIONS_CODE["$opt"]}" ]
+                                  then
+                                    cmds[ ${OPTIONS_CODE["$opt"]} ]=''
+                                  fi
                                   ;;
             
             -no*                ) opt=${opt#'-no'}
                                   # remove command
-                                  cmds[ ${OPTIONS_CODE["$opt"]} ]=''
+                                  if [ -n "$opt" ] && [ -n "${OPTIONS_CODE["$opt"]}" ]
+                                  then
+                                     cmds[ ${OPTIONS_CODE["$opt"]} ]=''
+                                  fi
                                   ;;
 
             --*                 ) opt=${opt#'--'}
                                   # Add command
-                                  cmds[ ${OPTIONS_CODE["$opt"]} ]="$opt"
+                                  if [ -n "$opt" ] && [ -n "${OPTIONS_CODE["$opt"]}" ]
+                                  then
+                                    cmds[ ${OPTIONS_CODE["$opt"]} ]="$opt"
+                                  fi
                                   ;;
             -*                  ) opt=${opt#'-'}
                                   # Add command
-                                  cmds[ ${OPTIONS_CODE["$opt"]} ]="$opt"
+                                  if [ -n "$opt" ] && [ -n "${OPTIONS_CODE["$opt"]}" ]
+                                  then
+                                    cmds[ ${OPTIONS_CODE["$opt"]} ]="$opt"
+                                  fi
                                   ;;
         esac
     done
