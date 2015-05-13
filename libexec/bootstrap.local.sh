@@ -95,7 +95,12 @@ function main() {
     ##
     # STAGE 2 Bootstrap : Install hooks and submodules using the installed libexec
     $DO cd "$fresh_install_dir/libexec"
-    $DO ./install_module.sh -bootstrap -all || die "[main] $SCRIPTFQN died: $!"
+    $DO ./install_module.sh -bootstrap "$@" || die "[main] $SCRIPTFQN died: $!"
 }
 
-${DO} main "$@"
+if [ $# -lt 1 ]
+then
+    ${DO} main --all
+else
+    ${DO} main "$@"
+fi

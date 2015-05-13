@@ -280,6 +280,7 @@ function file_owner () {
 }
 
 # script_pre = $(get_pre script.sh modulename)
+# Typically <module>/install_module.pre.sh
 function get_pre () {
     local scriptname="$1"
     local modulename="$2"
@@ -288,6 +289,7 @@ function get_pre () {
 }
 
 # script_post = $(get_post script.sh modulename)
+# Typically <module>/install_module.post.sh
 function get_post () {
     local scriptname="$1"
     local modulename="$2"
@@ -296,12 +298,32 @@ function get_post () {
 }
 
 # script_middle = $(get_mid script.sh modulename)
+# Typically <module>/install_module.mid.sh
 function get_mid () {
     local scriptname="$1"
     local modulename="$2"
 
     echo "${LIBEXEC}/modules/${modulename}/$(basename "${scriptname}" .sh).mid.sh"
 }
+
+# script_prereinstall = $(get_prere script.sh modulename)
+# Typically <module>/reinstall_module.pre.sh
+function get_prere () {
+    local scriptname="$1"
+    local modulename="$2"
+
+    echo "${LIBEXEC}/modules/${modulename}/$(basename "${scriptname}" .sh).pre.sh"
+}
+
+# script_postreinstall = $(get_postre script.sh modulename)
+# Typically <module>/reinstall_module.post.sh
+function get_postre () {
+    local scriptname="$1"
+    local modulename="$2"
+
+    echo "${LIBEXEC}/modules/${modulename}/$(basename "${scriptname}" .sh).post.sh"
+}
+
 
 #----------------------------------------
 # GITHUB STUFF
